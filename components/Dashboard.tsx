@@ -1,15 +1,20 @@
-'use client';
-
 import React from 'react';
 import { ActivityDistribution } from '@/components/visualizations/ActivityDistribution';
 import { EmployeeActivity } from '@/components/visualizations/EmployeeActivity';
 import { PeakActivityTimes } from '@/components/visualizations/PeakActivityTimes';
 import { RegionHeatmap } from '@/components/visualizations/RegionHeatmap';
+import { DashboardOverview } from '@/components/DashboardOverview';
 import SettingsSidebar from '@/components/SettingsSidebar';
 import VisualizationWrapper from '@/components/common/VisualizationWrapper';
-import { useColorStore } from '@/stores/useColorStore';
 import type { ActivityRecord, BaseActivityProps, ChartId } from '@/types/activity';
 import type { FilterSettings, Metadata } from '@/types/warehouse';
+import { useColorStore } from '@/stores/useColorStore';
+
+const DEFAULT_HIDDEN_ACTIVITIES = new Set(['Sit', 'Unknown']);
+
+interface DashboardProps {
+  data: ActivityRecord[];
+}
 
 interface ChartConfig {
   id: ChartId;
@@ -22,19 +27,11 @@ const CHARTS: ChartConfig[] = [
   { id: 'employee-activity', title: 'Employee Activity', component: EmployeeActivity },
   { id: 'peak-activity', title: 'Peak Activity Times', component: PeakActivityTimes },
   { id: 'region-heatmap', title: 'Region Heatmap', component: RegionHeatmap },
-];
+] as const;
 
-interface DashboardProps {
-  data: ActivityRecord[];
-}
-
-const Dashboard: React.FC<DashboardProps> = ({
-  data
-}) => {
-  // Subscribe to color scheme changes
+const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const globalScheme = useColorStore(state => state.globalScheme);
 
-  // Calculate metadata
   const metadata = React.useMemo<Metadata>(() => {
     const uniqueActivities = Array.from(new Set(data.map(record => record.activity)));
     const dateRange = {
@@ -51,9 +48,8 @@ const Dashboard: React.FC<DashboardProps> = ({
     };
   }, [data]);
 
-  // Initialize filter settings
   const [filterSettings, setFilterSettings] = React.useState<FilterSettings>(() => ({
-    hiddenActivities: new Set<string>(),
+    hiddenActivities: DEFAULT_HIDDEN_ACTIVITIES,
     selectedDates: new Set(data.map(record => record.date)),
     comparisonDates: new Set<string>(),
     selectedEmployees: new Set<string>(),
@@ -61,16 +57,25 @@ const Dashboard: React.FC<DashboardProps> = ({
     isComparisonEnabled: false,
   }));
 
-  // Create a key that changes when the color scheme changes
-  const colorKey = React.useMemo(() => `color-${globalScheme}`, [globalScheme]);
+  const filteredData = React.useMemo(() => 
+    data.filter(record => !filterSettings.hiddenActivities.has(record.activity)),
+    [data, filterSettings.hiddenActivities]
+  );
 
-  const chartProps: BaseActivityProps = {
-    data,
+  const createChartProps = React.useCallback((chartId: ChartId): BaseActivityProps => ({
+    data: filteredData,
     hiddenActivities: filterSettings.hiddenActivities,
     selectedDates: filterSettings.selectedDates,
     comparisonDates: filterSettings.comparisonDates,
     isComparisonEnabled: filterSettings.isComparisonEnabled,
-  };
+    chartId,
+  }), [
+    filteredData,
+    filterSettings.hiddenActivities,
+    filterSettings.selectedDates,
+    filterSettings.comparisonDates,
+    filterSettings.isComparisonEnabled,
+  ]);
 
   return (
     <div className="p-6 space-y-6">
@@ -82,11 +87,22 @@ const Dashboard: React.FC<DashboardProps> = ({
           onFilterChange={setFilterSettings}
         />
       </div>
+
+      <DashboardOverview
+        metadata={metadata}
+        selectedDates={filterSettings.selectedDates}
+        comparisonDates={filterSettings.comparisonDates}
+        isComparisonEnabled={filterSettings.isComparisonEnabled}
+        data={filteredData}
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {CHARTS.map(({ id, title, component: ChartComponent }) => (
-          <VisualizationWrapper key={`${id}-${colorKey}`} title={title}>
-            <ChartComponent {...chartProps} />
+          <VisualizationWrapper key={id} title={title}>
+            <ChartComponent 
+              {...createChartProps(id)} 
+              key={`${id}-${globalScheme}`} 
+            />
           </VisualizationWrapper>
         ))}
       </div>

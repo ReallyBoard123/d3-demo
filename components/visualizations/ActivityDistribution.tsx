@@ -18,11 +18,12 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
   hiddenActivities,
   selectedDates,
   comparisonDates,
-  isComparisonEnabled
+  isComparisonEnabled,
+  chartId
 }) => {
   const [inactiveActivities, setInactiveActivities] = React.useState<Set<string>>(new Set());
   const getChartColors = useColorStore(state => state.getChartColors);
-  const colors = getChartColors('activity-distribution');
+  const colors = getChartColors(chartId);
 
   const dateDisplay = React.useMemo(() => ({
     selected: formatDateRange(selectedDates),
@@ -83,14 +84,14 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
   const legendItems: LegendItem[] = React.useMemo(() => 
     processedData.map((item, index) => ({
       label: item.activity,
-      color: colors[index % colors.length],
+      color: colors.primary[index % colors.primary.length],
       value: `${item.selected.toFixed(1)}h`,
       inactive: inactiveActivities.has(item.activity),
       onClick: () => toggleActivity(item.activity),
       ...(isComparisonEnabled && item.comparison !== undefined ? {
         comparison: {
           value: `${item.comparison.toFixed(1)}h`,
-          color: `${colors[index % colors.length]}88`
+          color: colors.comparison[index % colors.comparison.length]
         }
       } : {})
     })), [processedData, colors, inactiveActivities, isComparisonEnabled]);
@@ -128,13 +129,13 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
               />
               <Bar
                 dataKey="selected"
-                fill={colors[0]}
+                fill={colors.primary[0]}
                 hide={inactiveActivities.has(processedData[0]?.activity)}
               />
               {isComparisonEnabled && (
                 <Bar
                   dataKey="comparison"
-                  fill={`${colors[0]}88`}
+                  fill={colors.comparison[0]}
                   hide={inactiveActivities.has(processedData[0]?.activity)}
                 />
               )}

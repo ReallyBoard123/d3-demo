@@ -18,10 +18,11 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
   hiddenActivities,
   selectedDates,
   comparisonDates,
-  isComparisonEnabled
+  isComparisonEnabled,
+  chartId
 }) => {
   const getChartColors = useColorStore(state => state.getChartColors);
-  const colors = getChartColors('peak-activity');
+  const colors = getChartColors(chartId);
 
   const dateDisplay = React.useMemo(() => ({
     selected: formatDateRange(selectedDates),
@@ -69,11 +70,11 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
   const legendItems: LegendItem[] = React.useMemo(() => [
     {
       label: 'Selected Period',
-      color: colors[0],
+      color: colors.primary[0],
       value: `${hourlyData.reduce((sum, h) => sum + h.selected, 0).toFixed(1)}h total`,
       ...(isComparisonEnabled ? {
         comparison: {
-          color: colors[1],
+          color: colors.comparison[0],
           value: `${hourlyData.reduce((sum, h) => sum + (h.comparison || 0), 0).toFixed(1)}h total`
         }
       } : {})
@@ -115,7 +116,7 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
               <Line 
                 type="monotone" 
                 dataKey="selected"
-                stroke={colors[0]}
+                stroke={colors.primary[0]}
                 strokeWidth={2}
                 dot={false}
               />
@@ -123,7 +124,7 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
                 <Line 
                   type="monotone" 
                   dataKey="comparison"
-                  stroke={colors[1]}
+                  stroke={colors.comparison[0]}
                   strokeWidth={2}
                   dot={false}
                   strokeDasharray="5 5"

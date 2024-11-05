@@ -5,6 +5,7 @@ import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
 import type { BaseActivityProps } from '@/types/activity';
 import { ACTIVITY_CONFIG } from '@/config/activity';
+
 interface RegionData {
   region: string;
   selectedHours: number;
@@ -13,16 +14,22 @@ interface RegionData {
   comparisonIntensity?: number;
 }
 
+interface RegionSummary {
+  selected: number;
+  comparison?: number;
+}
+
 export const RegionHeatmap: React.FC<BaseActivityProps> = ({
   data,
   hiddenActivities,
   selectedDates,
   comparisonDates,
-  isComparisonEnabled
+  isComparisonEnabled,
+  chartId
 }) => {
   const getChartColors = useColorStore(state => state.getChartColors);
-  const colors = getChartColors('region-heatmap');
-  const baseColor = colors[0];
+  const colors = getChartColors(chartId);
+  const baseColor = colors.primary[0];
 
   const dateDisplay = React.useMemo(() => ({
     selected: formatDateRange(selectedDates),
@@ -30,7 +37,7 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
   }), [selectedDates, comparisonDates, isComparisonEnabled]);
 
   const regionData = React.useMemo(() => {
-    const summary: Record<string, { selected: number; comparison?: number }> = {};
+    const summary: Record<string, RegionSummary> = {};
     
     // Process selected dates data
     data.forEach(record => {
@@ -59,14 +66,16 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
       });
     }
 
+    const maxDuration = ACTIVITY_CONFIG.MAX_HOURS_PER_DAY * 3600;
+
     return Object.entries(summary)
       .map(([region, values]): RegionData => ({
         region,
         selectedHours: values.selected / 3600,
         comparisonHours: values.comparison ? values.comparison / 3600 : undefined,
-        selectedIntensity: Math.min(1, values.selected / (ACTIVITY_CONFIG.MAX_HOURS_PER_DAY * 3600)),
+        selectedIntensity: Math.min(1, values.selected / maxDuration),
         comparisonIntensity: values.comparison 
-          ? Math.min(1, values.comparison / (ACTIVITY_CONFIG.MAX_HOURS_PER_DAY * 3600))
+          ? Math.min(1, values.comparison / maxDuration)
           : undefined
       }))
       .sort((a, b) => b.selectedHours - a.selectedHours)
@@ -79,12 +88,16 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
       color: baseColor,
       value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`,
       comparison: isComparisonEnabled ? {
-        color: `${baseColor}88`,
+        color: colors.comparison[0],
         value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`
       } : undefined
     }
-  ], [baseColor, isComparisonEnabled]);
+  ], [baseColor, colors, isComparisonEnabled]);
 
+  const getColorIntensity = (intensity: number): string => {
+    const hex = Math.floor(intensity * 255).toString(16).padStart(2, '0');
+    return `${baseColor}${hex}`;
+  };
 
   return (
     <Card className="w-full">
@@ -113,7 +126,7 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
               <div 
                 className="absolute inset-0 rounded-lg"
                 style={{
-                  backgroundColor: `${baseColor}${Math.floor(selectedIntensity * 255).toString(16).padStart(2, '0')}`,
+                  backgroundColor: getColorIntensity(selectedIntensity),
                   transition: 'background-color 0.2s ease-in-out',
                 }}
               />

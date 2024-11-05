@@ -27,11 +27,12 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
   hiddenActivities,
   selectedDates,
   comparisonDates,
-  isComparisonEnabled
+  isComparisonEnabled,
+  chartId
 }) => {
   const [inactiveActivities, setInactiveActivities] = React.useState<Set<string>>(new Set());
   const getChartColors = useColorStore(state => state.getChartColors);
-  const colors = getChartColors('employee-activity');
+  const colors = getChartColors(chartId);
 
   const dateDisplay = React.useMemo(() => ({
     selected: formatDateRange(selectedDates),
@@ -108,12 +109,12 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
   const legendItems: LegendItem[] = React.useMemo(() => 
     activities.map((activity, index) => ({
       label: activity,
-      color: colors[index % colors.length],
+      color: colors.primary[index % colors.primary.length],
       inactive: inactiveActivities.has(activity),
       onClick: () => toggleActivity(activity),
       ...(isComparisonEnabled ? {
         comparison: {
-          color: `${colors[index % colors.length]}88`,
+          color: colors.comparison[index % colors.comparison.length],
           value: ''
         }
       } : {})
@@ -156,14 +157,14 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
                   <Bar
                     dataKey={`${activity}_selected`}
                     stackId="selected"
-                    fill={colors[index % colors.length]}
+                    fill={colors.primary[index % colors.primary.length]}
                     hide={inactiveActivities.has(activity)}
                   />
                   {isComparisonEnabled && (
                     <Bar
                       dataKey={`${activity}_comparison`}
                       stackId="comparison"
-                      fill={`${colors[index % colors.length]}88`}
+                      fill={colors.comparison[index % colors.comparison.length]}
                       hide={inactiveActivities.has(activity)}
                     />
                   )}

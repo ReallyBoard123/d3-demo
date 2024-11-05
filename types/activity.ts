@@ -16,6 +16,11 @@ export interface BaseActivityProps {
   selectedDates: Set<string>;
   comparisonDates: Set<string>;
   isComparisonEnabled: boolean;
+  chartId: ChartId;
 }
 
-export type ChartId = 'activity-distribution' | 'employee-activity' | 'peak-activity' | 'region-heatmap';
+export type ChartId = 
+  | 'activity-distribution'
+  | 'employee-activity'
+  | 'peak-activity'
+  | 'region-heatmap';
