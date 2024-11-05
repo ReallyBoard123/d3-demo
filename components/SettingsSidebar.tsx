@@ -6,9 +6,12 @@ import { Switch } from "@/components/ui/switch";
 import { Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useColorStore, COLOR_SCHEMES } from '@/stores/useColorStore';
 import type { FilterSettings, Metadata } from '@/types/warehouse';
 import ColorSettingsTab from './common/ColorSettingsTab';
+
+const formatDisplayDate = (date: string) => {
+  return format(parse(date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy');
+};
 
 interface SettingsSidebarProps {
   metadata: Metadata;
@@ -16,17 +19,11 @@ interface SettingsSidebarProps {
   onFilterChange: (newSettings: FilterSettings) => void;
 }
 
-const formatDisplayDate = (date: string): string => {
-  const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
-  return format(parsedDate, 'EEE, MMM d');
-};
-
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   metadata,
   filterSettings,
   onFilterChange,
 }) => {
-  const { globalScheme, setGlobalScheme } = useColorStore();
   const toggleActivity = (activity: string) => {
     const newHiddenActivities = new Set(filterSettings.hiddenActivities);
     if (newHiddenActivities.has(activity)) {
@@ -66,7 +63,6 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     });
   };
 
-  // Get all available dates from the metadata date range
   const availableDates = React.useMemo(() => {
     const dates: string[] = [];
     const start = new Date(metadata.dateRange.start);

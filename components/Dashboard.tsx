@@ -11,11 +11,6 @@ import { useColorStore } from '@/stores/useColorStore';
 import type { ActivityRecord, BaseActivityProps, ChartId } from '@/types/activity';
 import type { FilterSettings, Metadata } from '@/types/warehouse';
 
-interface DashboardProps {
-  data: ActivityRecord[];
-  className?: string;
-}
-
 interface ChartConfig {
   id: ChartId;
   title: string;
@@ -29,9 +24,12 @@ const CHARTS: ChartConfig[] = [
   { id: 'region-heatmap', title: 'Region Heatmap', component: RegionHeatmap },
 ];
 
+interface DashboardProps {
+  data: ActivityRecord[];
+}
+
 const Dashboard: React.FC<DashboardProps> = ({
-  data,
-  className,
+  data
 }) => {
   // Subscribe to color scheme changes
   const globalScheme = useColorStore(state => state.globalScheme);
