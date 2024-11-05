@@ -14,33 +14,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GitCompareIcon, X } from "lucide-react";
+import { GitCompareIcon, X, AlertTriangle } from "lucide-react";
 import { format, parse, isValid } from "date-fns";
 import { cn } from '@/lib/utils';
 
+interface DateMetrics {
+  employeeCount: number;
+  totalDuration: number;
+}
+
 interface DateComparisonFilterProps {
-  availableDates: string[];  // yyyy-MM-dd format
+  dates: string[];  // All possible dates in yyyy-MM-dd format
   selectedDates: string[];
   onDateSelection: (dates: string[]) => void;
   comparisonMode: boolean;
   onComparisonModeChange: (enabled: boolean) => void;
+  expectedEmployeeCount: number;
+  dateMetrics: Record<string, DateMetrics>;
+}
+
+interface GroupedDates {
+  [weekKey: string]: Array<{
+    date: string;
+    metrics: DateMetrics;
+    hasIncompleteData: boolean;
+  }>;
 }
 
 const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
-  availableDates,
+  dates,
   selectedDates,
   onDateSelection,
   comparisonMode,
   onComparisonModeChange,
+  expectedEmployeeCount,
+  dateMetrics
 }) => {
-  // Group dates by week and month for better organization
+  // Group dates by week and filter out dates with no data
   const groupedDates = React.useMemo(() => {
-    const groups: Record<string, string[]> = {};
+    const groups: GroupedDates = {};
     
-    availableDates.forEach(date => {
+    dates.forEach(date => {
+      const metrics = dateMetrics[date];
+      
+      // Skip dates with no data
+      if (!metrics || metrics.totalDuration === 0) return;
+
       const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
       if (!isValid(parsedDate)) return;
 
@@ -48,15 +76,19 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
       if (!groups[weekKey]) {
         groups[weekKey] = [];
       }
-      groups[weekKey].push(date);
+
+      groups[weekKey].push({
+        date,
+        metrics,
+        hasIncompleteData: metrics.employeeCount < expectedEmployeeCount
+      });
     });
 
     return groups;
-  }, [availableDates]);
+  }, [dates, dateMetrics, expectedEmployeeCount]);
 
   const handleDateToggle = (date: string) => {
     if (comparisonMode && selectedDates.length >= 2 && !selectedDates.includes(date)) {
-      // In comparison mode, limit to 2 dates
       return;
     }
     
@@ -118,25 +150,47 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
                   <SelectLabel className="px-2 py-1.5 text-sm font-medium">
                     {weekLabel}
                   </SelectLabel>
-                  {dates.map(date => (
-                    <SelectItem
-                      key={date}
-                      value={date}
-                      onSelect={() => handleDateToggle(date)}
-                      className={cn(
-                        "cursor-pointer",
-                        selectedDates.includes(date) && "bg-secondary"
-                      )}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span>{formatDisplayDate(date)}</span>
-                        {selectedDates.includes(date) && (
-                          <Badge variant="outline" className="ml-2">
-                            Selected
-                          </Badge>
-                        )}
-                      </div>
-                    </SelectItem>
+                  {dates.map(({ date, metrics, hasIncompleteData }) => (
+                    <TooltipProvider key={date}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SelectItem
+                            value={date}
+                            onSelect={() => handleDateToggle(date)}
+                            className={cn(
+                              "cursor-pointer",
+                              selectedDates.includes(date) && "bg-secondary",
+                              hasIncompleteData && "border-l-2 border-red-500"
+                            )}
+                          >
+                            <div className="flex justify-between items-center w-full">
+                              <span>{formatDisplayDate(date)}</span>
+                              <div className="flex items-center gap-2">
+                                {hasIncompleteData && (
+                                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                                )}
+                                {selectedDates.includes(date) && (
+                                  <Badge variant="outline" className="ml-2">
+                                    Selected
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="space-y-1 text-sm">
+                            <p>Employees: {metrics.employeeCount}/{expectedEmployeeCount}</p>
+                            <p>Total Hours: {(metrics.totalDuration / 3600).toFixed(1)}h</p>
+                            {hasIncompleteData && (
+                              <p className="text-red-500">
+                                Missing data for {expectedEmployeeCount - metrics.employeeCount} employee(s)
+                              </p>
+                            )}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   ))}
                 </SelectGroup>
               ))}

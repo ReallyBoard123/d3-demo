@@ -1,26 +1,32 @@
 import React from 'react';
-import { format, parse } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DateSelection } from '@/components/DateSelection';
 import type { FilterSettings, Metadata } from '@/types/warehouse';
 import ColorSettingsTab from './common/ColorSettingsTab';
 
-const formatDisplayDate = (date: string) => {
-  return format(parse(date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy');
-};
+interface DateMetrics {
+  employeeCount: number;
+  totalDuration: number;
+  missingEmployees: string[];
+}
 
 interface SettingsSidebarProps {
-  metadata: Metadata;
+  metadata: Metadata & {
+    expectedEmployeeCount: number;
+  };
+  dateMetrics: Record<string, DateMetrics>;
   filterSettings: FilterSettings;
   onFilterChange: (newSettings: FilterSettings) => void;
 }
 
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   metadata,
+  dateMetrics,
   filterSettings,
   onFilterChange,
 }) => {
@@ -37,43 +43,35 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     });
   };
 
-  const toggleDate = (date: string) => {
-    const newSelectedDates = new Set(filterSettings.selectedDates);
-    if (newSelectedDates.has(date)) {
-      newSelectedDates.delete(date);
-    } else {
-      newSelectedDates.add(date);
-    }
-    onFilterChange({
-      ...filterSettings,
-      selectedDates: newSelectedDates,
-    });
-  };
-
-  const toggleComparisonDate = (date: string) => {
-    const newComparisonDates = new Set(filterSettings.comparisonDates);
-    if (newComparisonDates.has(date)) {
-      newComparisonDates.delete(date);
-    } else {
-      newComparisonDates.add(date);
-    }
-    onFilterChange({
-      ...filterSettings,
-      comparisonDates: newComparisonDates,
-    });
-  };
-
+  // Get all available dates from the metadata date range
   const availableDates = React.useMemo(() => {
     const dates: string[] = [];
     const start = new Date(metadata.dateRange.start);
     const end = new Date(metadata.dateRange.end);
     
     for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
-      dates.push(format(date, 'yyyy-MM-dd'));
+      dates.push(date.toISOString().split('T')[0]); // Format as YYYY-MM-DD
     }
     
-    return dates;
+    return dates.sort();
   }, [metadata.dateRange]);
+
+  // Handler for date selection from DateSelection component
+  const handleDateToggle = (date: string, isComparison: boolean) => {
+    const targetSet = isComparison ? 'comparisonDates' : 'selectedDates';
+    const newDates = new Set(filterSettings[targetSet]);
+    
+    if (newDates.has(date)) {
+      newDates.delete(date);
+    } else {
+      newDates.add(date);
+    }
+
+    onFilterChange({
+      ...filterSettings,
+      [targetSet]: newDates,
+    });
+  };
 
   return (
     <Sheet>
@@ -117,51 +115,42 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
             <div className="py-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium">Date Selection</h3>
-                <Switch
-                  checked={filterSettings.isComparisonEnabled}
-                  onCheckedChange={(checked) => 
-                    onFilterChange({
-                      ...filterSettings,
-                      isComparisonEnabled: checked,
-                      comparisonDates: checked ? filterSettings.comparisonDates : new Set()
-                    })
-                  }
-                />
-                <span className="text-sm">Enable Comparison</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Compare Mode</span>
+                  <Switch
+                    checked={filterSettings.isComparisonEnabled}
+                    onCheckedChange={(checked) => 
+                      onFilterChange({
+                        ...filterSettings,
+                        isComparisonEnabled: checked,
+                        comparisonDates: checked ? filterSettings.comparisonDates : new Set()
+                      })
+                    }
+                  />
+                </div>
               </div>
               
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-2">
-                  {availableDates.map((date) => (
-                    <div key={date} className="flex items-center justify-between">
-                      <span className="text-sm">{formatDisplayDate(date)}</span>
-                      <div className="flex gap-2">
-                        <Switch
-                          checked={filterSettings.selectedDates.has(date)}
-                          onCheckedChange={() => toggleDate(date)}
-                        />
-                        {filterSettings.isComparisonEnabled && (
-                          <Switch
-                            checked={filterSettings.comparisonDates.has(date)}
-                            onCheckedChange={() => toggleComparisonDate(date)}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+              <DateSelection
+                dates={availableDates}
+                dateMetrics={dateMetrics}
+                selectedDates={filterSettings.selectedDates}
+                comparisonDates={filterSettings.comparisonDates}
+                isComparisonEnabled={filterSettings.isComparisonEnabled}
+                expectedEmployeeCount={metadata.expectedEmployeeCount}
+                onDateToggle={handleDateToggle}
+              />
               
               {filterSettings.isComparisonEnabled && (
                 <div className="mt-4">
                   <p className="text-xs text-muted-foreground">
-                    Select dates to compare. The charts will show data from selected dates
-                    compared with comparison dates.
+                    Select dates to compare using the second switch for each date.
+                    Charts will display data from both selected and comparison dates.
                   </p>
                 </div>
               )}
             </div>
           </TabsContent>
+          
           <ColorSettingsTab />
         </Tabs>
       </SheetContent>

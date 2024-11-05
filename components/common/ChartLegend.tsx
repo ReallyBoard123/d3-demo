@@ -9,7 +9,7 @@ export interface LegendItem {
   onClick?: () => void;
   comparison?: {
     value: string | number;
-    color: string;
+    color: string;  // Make color required for comparison items
   };
 }
 
@@ -44,16 +44,18 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
               />
               {showComparison && item.comparison && (
                 <div
-                  className="w-3 h-3 rounded opacity-60"
+                  className="w-3 h-3 rounded"
                   style={{ backgroundColor: item.comparison.color }}
                 />
               )}
             </div>
             <span className="text-sm font-medium">{item.label}</span>
           </div>
-          {item.value && (
+          {(item.value || (showComparison && item.comparison)) && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">{item.value}</span>
+              {item.value && (
+                <span className="text-sm text-gray-600">{item.value}</span>
+              )}
               {showComparison && item.comparison && (
                 <span className="text-sm text-gray-400">
                   vs {item.comparison.value}

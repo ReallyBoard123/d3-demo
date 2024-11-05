@@ -21,6 +21,7 @@ export interface Metadata {
   uniqueEmployees: number;
   uniqueRegions: number;
   uniqueActivities: string[];
+  expectedEmployeeCount: number;
 }
 
 export interface WarehouseData {

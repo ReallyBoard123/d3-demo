@@ -85,14 +85,16 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
   const legendItems: LegendItem[] = React.useMemo(() => [
     {
       label: 'Activity Intensity',
-      color: baseColor,
+      color: colors.primary[0],
       value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`,
-      comparison: isComparisonEnabled ? {
-        color: colors.comparison[0],
-        value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`
-      } : undefined
+      ...(isComparisonEnabled ? {
+        comparison: {
+          color: colors.comparison[0],
+          value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`
+        }
+      } : {})
     }
-  ], [baseColor, colors, isComparisonEnabled]);
+  ], [colors, isComparisonEnabled]);
 
   const getColorIntensity = (intensity: number): string => {
     const hex = Math.floor(intensity * 255).toString(16).padStart(2, '0');
