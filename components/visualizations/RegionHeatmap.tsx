@@ -1,52 +1,154 @@
 import React from 'react';
-import { ActivityRecord } from '@/types/warehouse';
-import VisualizationWrapper from '../common/VisualizationWrapper';
-
-interface RegionHeatmapProps {
-  data: ActivityRecord[];
-  hiddenActivities: Set<string>;
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
+import { formatDateRange } from '@/lib/utils';
+import { useColorStore } from '@/stores/useColorStore';
+import type { BaseActivityProps } from '@/types/activity';
+import { ACTIVITY_CONFIG } from '@/config/activity';
+interface RegionData {
+  region: string;
+  selectedHours: number;
+  comparisonHours?: number;
+  selectedIntensity: number;
+  comparisonIntensity?: number;
 }
 
-const RegionHeatmap: React.FC<RegionHeatmapProps> = ({ data, hiddenActivities }) => {
+export const RegionHeatmap: React.FC<BaseActivityProps> = ({
+  data,
+  hiddenActivities,
+  selectedDates,
+  comparisonDates,
+  isComparisonEnabled
+}) => {
+  const getChartColors = useColorStore(state => state.getChartColors);
+  const colors = getChartColors('region-heatmap');
+  const baseColor = colors[0];
+
+  const dateDisplay = React.useMemo(() => ({
+    selected: formatDateRange(selectedDates),
+    comparison: isComparisonEnabled ? formatDateRange(comparisonDates) : null
+  }), [selectedDates, comparisonDates, isComparisonEnabled]);
+
   const regionData = React.useMemo(() => {
-    const summary: Record<string, number> = {};
+    const summary: Record<string, { selected: number; comparison?: number }> = {};
     
+    // Process selected dates data
     data.forEach(record => {
       if (hiddenActivities.has(record.activity)) return;
+      if (!selectedDates.has(record.date)) return;
       
       if (!summary[record.region]) {
-        summary[record.region] = 0;
+        summary[record.region] = { selected: 0 };
       }
-      summary[record.region] += record.duration;
+      summary[record.region].selected += record.duration;
     });
 
+    // Process comparison dates if enabled
+    if (isComparisonEnabled) {
+      data.forEach(record => {
+        if (hiddenActivities.has(record.activity)) return;
+        if (!comparisonDates.has(record.date)) return;
+        
+        if (!summary[record.region]) {
+          summary[record.region] = { selected: 0, comparison: 0 };
+        }
+        if (!summary[record.region].comparison) {
+          summary[record.region].comparison = 0;
+        }
+        summary[record.region].comparison! += record.duration;
+      });
+    }
+
     return Object.entries(summary)
-      .map(([region, duration]) => ({
+      .map(([region, values]): RegionData => ({
         region,
-        hours: duration / 3600,
-        intensity: Math.min(1, duration / (8 * 3600)) // Normalize to 8 hours max
+        selectedHours: values.selected / 3600,
+        comparisonHours: values.comparison ? values.comparison / 3600 : undefined,
+        selectedIntensity: Math.min(1, values.selected / (ACTIVITY_CONFIG.MAX_HOURS_PER_DAY * 3600)),
+        comparisonIntensity: values.comparison 
+          ? Math.min(1, values.comparison / (ACTIVITY_CONFIG.MAX_HOURS_PER_DAY * 3600))
+          : undefined
       }))
-      .sort((a, b) => b.hours - a.hours);
-  }, [data, hiddenActivities]);
+      .sort((a, b) => b.selectedHours - a.selectedHours)
+      .slice(0, ACTIVITY_CONFIG.TOP_REGIONS_LIMIT);
+  }, [data, hiddenActivities, selectedDates, comparisonDates, isComparisonEnabled]);
+
+  const legendItems: LegendItem[] = React.useMemo(() => [
+    {
+      label: 'Activity Intensity',
+      color: baseColor,
+      value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`,
+      comparison: isComparisonEnabled ? {
+        color: `${baseColor}88`,
+        value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`
+      } : undefined
+    }
+  ], [baseColor, isComparisonEnabled]);
+
 
   return (
-    <VisualizationWrapper title="Region Activity Heat Map">
-      <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
-        {regionData.map(({ region, hours, intensity }) => (
-          <div 
-            key={region} 
-            className="p-3 rounded"
-            style={{
-              backgroundColor: `rgba(79, 70, 229, ${intensity})`
-            }}
-          >
-            <p className="text-sm font-medium text-white">{region}</p>
-            <p className="text-xs text-white/80">{hours.toFixed(1)}h</p>
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>Region Activity Heat Map</CardTitle>
+          <div className="text-sm font-normal text-gray-500">
+            <div>{dateDisplay.selected}</div>
+            {isComparisonEnabled && dateDisplay.comparison && (
+              <div>vs {dateDisplay.comparison}</div>
+            )}
           </div>
-        ))}
-      </div>
-    </VisualizationWrapper>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-2">
+          {regionData.map(({ region, selectedHours, comparisonHours, selectedIntensity }) => (
+            <div 
+              key={region} 
+              className="relative"
+            >
+              {/* Border container */}
+              <div className="absolute inset-0 rounded-lg border-2 border-slate-300" />
+              
+              {/* Background color container */}
+              <div 
+                className="absolute inset-0 rounded-lg"
+                style={{
+                  backgroundColor: `${baseColor}${Math.floor(selectedIntensity * 255).toString(16).padStart(2, '0')}`,
+                  transition: 'background-color 0.2s ease-in-out',
+                }}
+              />
+              
+              {/* Content container */}
+              <div className="relative p-4">
+                <p 
+                  className="text-sm font-medium truncate" 
+                  style={{ color: selectedIntensity > 0.5 ? 'white' : 'black' }}
+                  title={region}
+                >
+                  {region}
+                </p>
+                <p 
+                  className="text-xs mt-1"
+                  style={{ color: selectedIntensity > 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)' }}
+                >
+                  {selectedHours.toFixed(1)}h
+                  {isComparisonEnabled && comparisonHours !== undefined && (
+                    <span className="ml-2">
+                      vs {comparisonHours.toFixed(1)}h
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <ChartLegend
+          className="mt-6"
+          items={legendItems}
+          showComparison={isComparisonEnabled}
+        />
+      </CardContent>
+    </Card>
   );
 };
-
-export default RegionHeatmap;
