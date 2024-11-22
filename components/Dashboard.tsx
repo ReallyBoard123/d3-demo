@@ -1,42 +1,58 @@
-'use client';
+"use client"
 
 import React from 'react';
-import { ActivityDistribution } from '@/components/visualizations/ActivityDistribution';
-import { EmployeeActivity } from '@/components/visualizations/EmployeeActivity';
-import { PeakActivityTimes } from '@/components/visualizations/PeakActivityTimes';
-import { RegionHeatmap } from '@/components/visualizations/RegionHeatmap';
-import { DashboardOverview } from '@/components/DashboardOverview';
-import SettingsSidebar from '@/components/SettingsSidebar';
-import VisualizationWrapper from '@/components/common/VisualizationWrapper';
-import { Progress } from "@/components/ui/progress";
+import { ActivityDistribution } from './visualizations/ActivityDistribution';
+import { EmployeeActivity } from './visualizations/EmployeeActivity';
+import { PeakActivityTimes } from './visualizations/PeakActivityTimes';
+import { RegionHeatmap } from './visualizations/RegionHeatmap';
+import { DashboardOverview } from './DashboardOverview';
+import SettingsSidebar from './SettingsSidebar';
+import VisualizationWrapper from './common/VisualizationWrapper';
 import { useColorStore } from '@/stores/useColorStore';
-import type { ActivityRecord } from '@/types/activity';
-import type { FilterSettings } from '@/types/warehouse';
+import { Progress } from './ui/progress';
+import TimelineVisualization from './visualizations/TimelineVisualization';
+import { ActivityRecord, BaseActivityProps, ChartConfig, ChartId, FilterSettings } from '@/types';
 
-// Define ChartId type based on available charts
-type ChartId = 'activity-distribution' | 'employee-activity' | 'peak-activity' | 'region-heatmap';
 
-// Extended props including chartId
-interface BaseActivityProps {
-  data: ActivityRecord[];
-  hiddenActivities: Set<string>;
-  selectedDates: Set<string>;
-  comparisonDates: Set<string>;
-  isComparisonEnabled: boolean;
-  chartId: ChartId;
-}
-
-const DEFAULT_HIDDEN_ACTIVITIES = new Set(['Sit', 'Unknown']);
+const CHARTS: ChartConfig[] = [
+  { 
+    id: 'activity-timeline',
+    title: 'Activity Timeline', 
+    component: TimelineVisualization,
+    fullWidth: true, 
+    defaultVisible: true  
+  },
+  { 
+    id: 'activity-distribution', 
+    title: 'Activity Distribution', 
+    component: ActivityDistribution,
+    defaultVisible: true
+  },
+  { 
+    id: 'employee-activity', 
+    title: 'Employee Activity', 
+    component: EmployeeActivity,
+    defaultVisible: true
+  },
+  { 
+    id: 'peak-activity', 
+    title: 'Peak Activity Times', 
+    component: PeakActivityTimes,
+    defaultVisible: true
+  },
+  { 
+    id: 'region-heatmap', 
+    title: 'Region Heatmap', 
+    component: RegionHeatmap,
+    defaultVisible: true
+  },
+] as const;
 
 interface DashboardProps {
   data: ActivityRecord[];
 }
 
-interface ChartConfig {
-  id: ChartId;
-  title: string;
-  component: React.ComponentType<BaseActivityProps>;
-}
+const DEFAULT_HIDDEN_ACTIVITIES = new Set(['Sit', 'Unknown']);
 
 interface DateMetrics {
   employeeCount: number;
@@ -44,16 +60,9 @@ interface DateMetrics {
   missingEmployees: string[];
 }
 
-const CHARTS: ChartConfig[] = [
-  { id: 'activity-distribution', title: 'Activity Distribution', component: ActivityDistribution },
-  { id: 'employee-activity', title: 'Employee Activity', component: EmployeeActivity },
-  { id: 'peak-activity', title: 'Peak Activity Times', component: PeakActivityTimes },
-  { id: 'region-heatmap', title: 'Region Heatmap', component: RegionHeatmap },
-] as const;
-
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const globalScheme = useColorStore(state => state.globalScheme);
-  const [loadingProgress, setLoadingProgress] = React.useState(0);
+  const [loadingProgress, setLoadingProgress] = React.useState<number>(0);
   
   // Calculate basic sets - this is fast
   const basicMetadata = React.useMemo(() => {
@@ -137,6 +146,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     selectedEmployees: new Set<string>(),
     selectedRegions: new Set<string>(),
     isComparisonEnabled: false,
+    visibleCharts: new Set(
+      CHARTS.filter(chart => chart.defaultVisible).map(chart => chart.id)
+    )
   }));
 
   const filteredData = React.useMemo(() => {
@@ -166,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       { progress: 50, delay: 200 },
       { progress: 75, delay: 300 },
       { progress: 100, delay: 400 },
-    ];
+    ] as const;
   
     let mounted = true;
   
@@ -207,6 +219,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           dateMetrics={dateMetrics}
           filterSettings={filterSettings}
           onFilterChange={setFilterSettings}
+          availableCharts={CHARTS}
         />
       </div>
 
@@ -219,14 +232,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {CHARTS.map(({ id, title, component: ChartComponent }) => (
-          <VisualizationWrapper key={id} title={title}>
-            <ChartComponent 
-              {...createChartProps(id)} 
-              key={`${id}-${globalScheme}`} 
-            />
-          </VisualizationWrapper>
-        ))}
+        {CHARTS.map(({ id, title, component: ChartComponent, fullWidth }) => {
+          if (!filterSettings.visibleCharts.has(id)) return null;
+
+          const chart = (
+            <VisualizationWrapper key={id} title={title}>
+              <ChartComponent 
+                {...createChartProps(id)} 
+                key={`${id}-${globalScheme}`} 
+              />
+            </VisualizationWrapper>
+          );
+
+          return fullWidth ? (
+            <div key={id} className="col-span-full">
+              {chart}
+            </div>
+          ) : chart;
+        })}
       </div>
     </div>
   );

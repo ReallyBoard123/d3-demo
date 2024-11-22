@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ActivityTooltip } from '@/components/common/ActivityTooltip';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
@@ -11,6 +11,7 @@ interface ProcessedData {
   activity: string;
   selected: number;
   comparison?: number;
+  color?: string;
 }
 
 export const ActivityDistribution: React.FC<BaseActivityProps> = ({
@@ -30,7 +31,8 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
     comparison: isComparisonEnabled ? formatDateRange(comparisonDates) : null
   }), [selectedDates, comparisonDates, isComparisonEnabled]);
 
-  const processedData = React.useMemo(() => {
+  const { processedData, activities } = React.useMemo(() => {
+    const activitySet = new Set<string>();
     const summary: Record<string, { selected: number; comparison?: number }> = {};
     
     // Process selected dates data
@@ -40,6 +42,7 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
           summary[record.activity] = { selected: 0 };
         }
         summary[record.activity].selected += record.duration / 3600;
+        activitySet.add(record.activity);
       }
     });
 
@@ -54,20 +57,29 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
             summary[record.activity].comparison = 0;
           }
           summary[record.activity].comparison! += record.duration / 3600;
+          activitySet.add(record.activity);
         }
       });
     }
 
-    return Object.entries(summary)
-      .map(([activity, values]): ProcessedData => ({
-        activity,
-        selected: Number(values.selected.toFixed(2)),
-        ...(isComparisonEnabled ? { 
-          comparison: Number(values.comparison?.toFixed(2) ?? 0) 
-        } : {})
-      }))
-      .sort((a, b) => b.selected - a.selected);
-  }, [data, hiddenActivities, selectedDates, comparisonDates, isComparisonEnabled]);
+    const sortedActivities = Array.from(activitySet).sort((a, b) => {
+      return (summary[b]?.selected || 0) - (summary[a]?.selected || 0);
+    });
+
+    const processedData = sortedActivities.map((activity, index) => ({
+      activity,
+      selected: Number(summary[activity].selected.toFixed(2)),
+      color: colors.primary[index % colors.primary.length],
+      ...(isComparisonEnabled ? { 
+        comparison: Number(summary[activity].comparison?.toFixed(2) ?? 0) 
+      } : {})
+    }));
+
+    return {
+      processedData,
+      activities: sortedActivities
+    };
+  }, [data, hiddenActivities, selectedDates, comparisonDates, isComparisonEnabled, colors]);
 
   const toggleActivity = (activity: string) => {
     setInactiveActivities(prev => {
@@ -82,19 +94,35 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
   };
 
   const legendItems: LegendItem[] = React.useMemo(() => 
-    processedData.map((item, index) => ({
-      label: item.activity,
+    activities.map((activity, index) => ({
+      label: activity,
       color: colors.primary[index % colors.primary.length],
-      value: `${item.selected.toFixed(1)}h`,
-      inactive: inactiveActivities.has(item.activity),
-      onClick: () => toggleActivity(item.activity),
-      ...(isComparisonEnabled && item.comparison !== undefined ? {
+      value: `${processedData[index].selected.toFixed(1)}h`,
+      inactive: inactiveActivities.has(activity),
+      onClick: () => toggleActivity(activity),
+      ...(isComparisonEnabled && processedData[index].comparison !== undefined ? {
         comparison: {
-          value: `${item.comparison.toFixed(1)}h`,
+          value: `${processedData[index].comparison.toFixed(1)}h`,
           color: colors.comparison[index % colors.comparison.length]
         }
       } : {})
-    })), [processedData, colors, inactiveActivities, isComparisonEnabled]);
+    })), [activities, processedData, colors, inactiveActivities, isComparisonEnabled]);
+
+  const getBarColor = (entry: ProcessedData) => {
+    if (inactiveActivities.has(entry.activity)) {
+      return 'transparent';
+    }
+    const index = activities.indexOf(entry.activity);
+    return colors.primary[index % colors.primary.length];
+  };
+
+  const getComparisonBarColor = (entry: ProcessedData) => {
+    if (inactiveActivities.has(entry.activity)) {
+      return 'transparent';
+    }
+    const index = activities.indexOf(entry.activity);
+    return colors.comparison[index % colors.comparison.length];
+  };
 
   return (
     <Card className="w-full">
@@ -127,17 +155,33 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
                   />
                 }
               />
-              <Bar
+              <Bar 
                 dataKey="selected"
-                fill={colors.primary[0]}
-                hide={inactiveActivities.has(processedData[0]?.activity)}
-              />
+                fill="transparent"
+                fillOpacity={1}
+                stroke="none"
+              >
+                {processedData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={getBarColor(entry)}
+                  />
+                ))}
+              </Bar>
               {isComparisonEnabled && (
-                <Bar
+                <Bar 
                   dataKey="comparison"
-                  fill={colors.comparison[0]}
-                  hide={inactiveActivities.has(processedData[0]?.activity)}
-                />
+                  fill="transparent"
+                  fillOpacity={1}
+                  stroke="none"
+                >
+                  {processedData.map((entry, index) => (
+                    <Cell
+                      key={`cell-comparison-${index}`}
+                      fill={getComparisonBarColor(entry)}
+                    />
+                  ))}
+                </Bar>
               )}
             </BarChart>
           </ResponsiveContainer>

@@ -5,14 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Wand2 } from "lucide-react";
-import type { ColorPalette } from '@/stores/useColorStore';
+import { Wand2, Save, X } from "lucide-react";
+import type { ColorPalette } from '@/config/color';
 
 interface ColorPaletteGeneratorProps {
   onSave: (name: string, palette: ColorPalette) => void;
   onCancel: () => void;
+  initialPalette?: ColorPalette;
+  initialName?: string;
+  isEditing?: boolean;
+  isPresetEdit?: boolean; // New prop
 }
-
 interface ColorPickerProps {
   color: string;
   onChange: (color: string) => void;
@@ -37,19 +40,26 @@ const ColorPickerButton: React.FC<ColorPickerProps> = ({ color, onChange, label 
 export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
   onSave,
   onCancel,
+  initialPalette,
+  initialName = '',
+  isEditing = false,
 }) => {
-  const [name, setName] = React.useState('');
+  const [name, setName] = React.useState(initialName);
   const [useGradient, setUseGradient] = React.useState(false);
   const [hue, setHue] = React.useState(210);
   const [saturation, setSaturation] = React.useState(70);
   const [lightness, setLightness] = React.useState(50);
   
-  const [primaryColors, setPrimaryColors] = React.useState<string[]>([
-    '#4f46e5', '#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706'
-  ]);
-  const [comparisonColors, setComparisonColors] = React.useState<string[]>([
-    '#9333ea', '#4f46e5', '#ec4899', '#f97316', '#84cc16', '#06b6d4'
-  ]);
+  const [primaryColors, setPrimaryColors] = React.useState<string[]>(
+    initialPalette?.primary || [
+      '#4f46e5', '#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706'
+    ]
+  );
+  const [comparisonColors, setComparisonColors] = React.useState<string[]>(
+    initialPalette?.comparison || [
+      '#9333ea', '#4f46e5', '#ec4899', '#f97316', '#84cc16', '#06b6d4'
+    ]
+  );
 
   const generateGradient = () => {
     const generateHslPalette = (baseHue: number, count: number): string[] => {
@@ -183,11 +193,14 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Theme name"
+          disabled={isEditing}
         />
         <Button onClick={handleSave} disabled={!name.trim()}>
-          Save
+          <Save className="mr-2 h-4 w-4" />
+          {isEditing ? 'Update' : 'Save'}
         </Button>
         <Button variant="outline" onClick={onCancel}>
+          <X className="mr-2 h-4 w-4" />
           Cancel
         </Button>
       </div>

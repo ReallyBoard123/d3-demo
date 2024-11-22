@@ -6,29 +6,16 @@ import { Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateSelection } from '@/components/DateSelection';
-import type { FilterSettings, Metadata } from '@/types/warehouse';
 import ColorSettingsTab from './common/ColorSettingsTab';
+import { ChartId, SettingsSidebarProps } from '@/types';
 
-interface DateMetrics {
-  employeeCount: number;
-  totalDuration: number;
-  missingEmployees: string[];
-}
-
-interface SettingsSidebarProps {
-  metadata: Metadata & {
-    expectedEmployeeCount: number;
-  };
-  dateMetrics: Record<string, DateMetrics>;
-  filterSettings: FilterSettings;
-  onFilterChange: (newSettings: FilterSettings) => void;
-}
 
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   metadata,
   dateMetrics,
   filterSettings,
   onFilterChange,
+  availableCharts,
 }) => {
   const toggleActivity = (activity: string) => {
     const newHiddenActivities = new Set(filterSettings.hiddenActivities);
@@ -40,6 +27,19 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     onFilterChange({
       ...filterSettings,
       hiddenActivities: newHiddenActivities,
+    });
+  };
+
+  const toggleChart = (chartId: ChartId) => {
+    const newVisibleCharts = new Set(filterSettings.visibleCharts);
+    if (newVisibleCharts.has(chartId)) {
+      newVisibleCharts.delete(chartId);
+    } else {
+      newVisibleCharts.add(chartId);
+    }
+    onFilterChange({
+      ...filterSettings,
+      visibleCharts: newVisibleCharts,
     });
   };
 
@@ -86,9 +86,10 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
         </SheetHeader>
         
         <Tabs defaultValue="activities" className="w-full mt-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="dates">Dates</TabsTrigger>
+            <TabsTrigger value="charts">Charts</TabsTrigger>
             <TabsTrigger value="colors">Colors</TabsTrigger>
           </TabsList>
           
@@ -148,6 +149,28 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                   </p>
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="charts">
+            <div className="py-4">
+              <h3 className="mb-2 text-sm font-medium">Visible Charts</h3>
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-2">
+                  {availableCharts.map((chart) => (
+                    <div key={chart.id} className="flex items-center justify-between">
+                      <span className="text-sm">{chart.title}</span>
+                      <Switch
+                        checked={filterSettings.visibleCharts.has(chart.id)}
+                        onCheckedChange={() => toggleChart(chart.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <p className="text-xs text-muted-foreground mt-4">
+                Toggle charts to customize your dashboard view
+              </p>
             </div>
           </TabsContent>
           

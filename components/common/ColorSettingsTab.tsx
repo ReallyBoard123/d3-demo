@@ -1,83 +1,23 @@
 import React from 'react';
-import { useColorStore, COLOR_SCHEMES, type ColorPalette } from '@/stores/useColorStore';
-import { Label } from "@/components/ui/label";
+import { useColorStore } from '@/stores/useColorStore';
 import { TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ColorPaletteGenerator } from '../ColorPalleteGenerator';
+import { ColorSchemeOption } from './ColorSchemeOption';
+import { 
+  COLOR_SCHEMES,
+  type ColorPalette,
+} from '@/config/color';
 
-interface ColorSchemeOptionProps {
-  name: string;
-  colors: ColorPalette;
-  isSelected: boolean;
-  isCustom?: boolean;
-  onSelect: () => void;
-  onDelete?: () => void;
+interface EditingState {
+  originalName: string;
+  palette: ColorPalette;
+  isPreset: boolean;
 }
-
-const ColorSchemeOption: React.FC<ColorSchemeOptionProps> = ({
-  name,
-  colors,
-  isSelected,
-  isCustom,
-  onSelect,
-  onDelete
-}) => {
-  const renderColorStrip = (colors: string[]) => (
-    <div className="flex gap-0.5 rounded-sm overflow-hidden">
-      {colors.slice(0, 4).map((color, i) => (
-        <div
-          key={i}
-          className="h-5 w-5"
-          style={{ backgroundColor: color }}
-        />
-      ))}
-    </div>
-  );
-
-  return (
-    <div className="flex items-center justify-between group">
-      <div 
-        className="flex items-center space-x-2 cursor-pointer flex-1"
-        onClick={onSelect}
-        role="button"
-        tabIndex={0}
-        onKeyPress={(e) => e.key === 'Enter' && onSelect()}
-      >
-        <div className={`
-          p-0.5 rounded-md border-2 transition-colors
-          ${isSelected ? 'border-primary' : 'border-transparent'}
-        `}>
-          <div className="space-y-0.5">
-            {renderColorStrip(colors.primary)}
-            {renderColorStrip(colors.comparison)}
-          </div>
-        </div>
-        <Label className="text-sm font-normal">
-          {name}
-        </Label>
-      </div>
-      {isCustom && onDelete && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          title="Delete theme"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  );
-};
 
 const ColorSettingsTab: React.FC = () => {
   const { 
@@ -89,18 +29,72 @@ const ColorSettingsTab: React.FC = () => {
   } = useColorStore();
 
   const [showGenerator, setShowGenerator] = React.useState(false);
+  const [editingState, setEditingState] = React.useState<EditingState | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSave = (name: string, palette: ColorPalette) => {
-    if (COLOR_SCHEMES.some(scheme => scheme.name === name)) {
+    // If we're editing a preset, force a new name
+    if (editingState?.isPreset && name === editingState.originalName) {
+      setError("Please provide a new name when saving modified preset theme");
+      return;
+    }
+
+    // Check for name conflicts with presets
+    if (COLOR_SCHEMES.some(scheme => scheme.name === name) && 
+        (!editingState || editingState.originalName !== name)) {
       setError("Cannot use a preset theme name. Please choose a different name.");
       return;
     }
+
     if (name.trim()) {
       saveCustomPalette(name, palette);
+      setGlobalScheme(name); // Automatically switch to the new/edited theme
       setShowGenerator(false);
+      setEditingState(null);
       setError(null);
     }
+  };
+
+  const handleEdit = (name: string) => {
+    // Find the palette in either presets or custom palettes
+    const presetScheme = COLOR_SCHEMES.find(scheme => scheme.name === name);
+    const isPreset = !!presetScheme;
+    
+    let palette: ColorPalette;
+    if (isPreset && presetScheme) {
+      palette = {
+        primary: [...presetScheme.colors.primary],
+        comparison: [...presetScheme.colors.comparison]
+      };
+    } else {
+      const customPalette = customPalettes[name];
+      if (!customPalette) {
+        console.error('Palette not found:', name);
+        return;
+      }
+      palette = {
+        primary: [...customPalette.primary],
+        comparison: [...customPalette.comparison]
+      };
+    }
+
+    setEditingState({
+      originalName: name,
+      palette,
+      isPreset
+    });
+    setShowGenerator(true);
+  };
+
+  const handleCancel = () => {
+    setShowGenerator(false);
+    setEditingState(null);
+    setError(null);
+  };
+
+  const handleCreate = () => {
+    setEditingState(null);
+    setShowGenerator(true);
   };
 
   return (
@@ -125,6 +119,7 @@ const ColorSettingsTab: React.FC = () => {
                   colors={scheme.colors}
                   isSelected={globalScheme === scheme.name}
                   onSelect={() => setGlobalScheme(scheme.name)}
+                  onEdit={() => handleEdit(scheme.name)}
                 />
               ))}
             </div>
@@ -135,17 +130,19 @@ const ColorSettingsTab: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium">Custom Themes</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowGenerator(!showGenerator)}
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                {showGenerator ? 'Cancel' : 'Create New'}
-              </Button>
+              {!showGenerator && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreate}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create New
+                </Button>
+              )}
             </div>
 
-            {Object.entries(customPalettes).length > 0 && (
+            {Object.entries(customPalettes).length > 0 && !showGenerator && (
               <div className="space-y-4 mb-6">
                 {Object.entries(customPalettes).map(([name, palette]) => (
                   <ColorSchemeOption
@@ -155,6 +152,7 @@ const ColorSettingsTab: React.FC = () => {
                     isSelected={globalScheme === name}
                     isCustom
                     onSelect={() => setGlobalScheme(name)}
+                    onEdit={() => handleEdit(name)}
                     onDelete={() => deleteCustomPalette(name)}
                   />
                 ))}
@@ -164,10 +162,11 @@ const ColorSettingsTab: React.FC = () => {
             {showGenerator && (
               <ColorPaletteGenerator
                 onSave={handleSave}
-                onCancel={() => {
-                  setShowGenerator(false);
-                  setError(null);
-                }}
+                onCancel={handleCancel}
+                initialPalette={editingState?.palette}
+                initialName={editingState?.originalName || ''}
+                isEditing={!!editingState}
+                isPresetEdit={editingState?.isPreset}
               />
             )}
           </div>

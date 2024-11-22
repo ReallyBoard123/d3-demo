@@ -1,14 +1,4 @@
-export interface ActivityRecord {
-  id: string;
-  date: string;
-  startTime: number;
-  endTime: number;
-  startTimeFormatted: string;
-  endTimeFormatted: string;
-  region: string;
-  activity: string;
-  duration: number;
-}
+import { ActivityRecord, ChartId } from './core';
 
 export interface BaseActivityProps {
   data: ActivityRecord[];
@@ -19,8 +9,12 @@ export interface BaseActivityProps {
   chartId: ChartId;
 }
 
-export type ChartId = 
-  | 'activity-distribution'
-  | 'employee-activity'
-  | 'peak-activity'
-  | 'region-heatmap';
+export interface FilterSettings {
+  hiddenActivities: Set<string>;
+  selectedDates: Set<string>;
+  comparisonDates: Set<string>;
+  selectedEmployees: Set<string>;
+  selectedRegions: Set<string>;
+  isComparisonEnabled: boolean;
+  visibleCharts: Set<ChartId>;
+}

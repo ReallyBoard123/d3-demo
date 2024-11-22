@@ -1,5 +1,3 @@
-// components/common/VisualizationWrapper.tsx
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";

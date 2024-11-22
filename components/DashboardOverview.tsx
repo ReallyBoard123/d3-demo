@@ -7,8 +7,9 @@ import {
   TrendingUp,
   Timer
 } from 'lucide-react';
-import type { Metadata } from '@/types/warehouse';
+
 import { cn } from '@/lib/utils';
+import { Metadata } from '@/types';
 
 interface StatCardProps {
   label: string;
