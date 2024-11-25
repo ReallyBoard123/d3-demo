@@ -15,6 +15,7 @@ export type ChartId =
   | 'employee-activity'
   | 'peak-activity'
   | 'region-heatmap'
-  | 'activity-timeline';
+  | 'activity-timeline'
+  | 'activity-heatmap';
 
 export type ChartSpeed = number;

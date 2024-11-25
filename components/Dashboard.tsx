@@ -12,6 +12,7 @@ import { useColorStore } from '@/stores/useColorStore';
 import { Progress } from './ui/progress';
 import TimelineVisualization from './visualizations/TimelineVisualization';
 import { ActivityRecord, BaseActivityProps, ChartConfig, ChartId, FilterSettings } from '@/types';
+import ActivityHeatmap from './visualizations/ActivityHeatmap';
 
 
 const CHARTS: ChartConfig[] = [
@@ -21,6 +22,13 @@ const CHARTS: ChartConfig[] = [
     component: TimelineVisualization,
     fullWidth: true, 
     defaultVisible: true  
+  },
+  {
+    id: 'activity-heatmap',
+    title: 'Activity Heat Map',
+    component: ActivityHeatmap,
+    fullWidth: true,
+    defaultVisible: true
   },
   { 
     id: 'activity-distribution', 
