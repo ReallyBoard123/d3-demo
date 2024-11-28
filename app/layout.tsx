@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 
 
 import "./globals.css";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,7 +32,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <header className="border-b">
+            <div className="container mx-auto p-4 flex justify-end">
+              <LanguageSwitcher />
+            </div>
+          </header>
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
         <Toaster />
       </body>
     </html>

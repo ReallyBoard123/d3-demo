@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useDropzone } from "react-dropzone";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +10,7 @@ import { Upload, Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
 import { ProcessMetadata, WarehouseData, WarehouseFiles } from '@/types';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface FileUploaderProps {
   onDataLoaded: (data: WarehouseData) => void;
@@ -20,6 +23,7 @@ interface FileStatus {
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
+  const { t } = useTranslation();
   const [files, setFiles] = React.useState<WarehouseFiles>({});
   const [error, setError] = React.useState<string | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -158,14 +162,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
     <Card className="w-full max-w-lg mx-auto mt-8">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          Upload Warehouse Activity Data
+          {t('fileUploader.title')}
           {areAllFilesUploaded && (
             <Button 
               variant="outline" 
               size="sm"
               onClick={clearFiles}
             >
-              Clear Files
+              {t('fileUploader.clearFiles')}
             </Button>
           )}
         </CardTitle>
@@ -183,13 +187,22 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
           <Upload className="h-8 w-8 mb-4 mx-auto text-muted-foreground" />
           <p className="text-lg mb-2">
             {isDragActive
-              ? "Drop the files here..."
-              : "Drag and drop files here, or click to select"}
+              ? t('fileUploader.dropHere')
+              : t('fileUploader.dragAndDrop')}
           </p>
           <div className="space-y-2 mt-4">
-            <FileStatusIndicator name="Layout Image (PNG)" isUploaded={fileStatus.layout} />
-            <FileStatusIndicator name="Process Metadata (JSON)" isUploaded={fileStatus.processMetadata} />
-            <FileStatusIndicator name="Warehouse Activity (JSON)" isUploaded={fileStatus.warehouseData} />
+            <FileStatusIndicator 
+              name={t('fileUploader.layoutImage')} 
+              isUploaded={fileStatus.layout} 
+            />
+            <FileStatusIndicator 
+              name={t('fileUploader.processMetadata')} 
+              isUploaded={fileStatus.processMetadata} 
+            />
+            <FileStatusIndicator 
+              name={t('fileUploader.warehouseActivity')} 
+              isUploaded={fileStatus.warehouseData} 
+            />
           </div>
         </div>
 
@@ -197,7 +210,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
           <div className="mt-4 space-y-2">
             <Progress value={uploadProgress} />
             <p className="text-sm text-muted-foreground text-center">
-              Processing files...
+              {t('fileUploader.processing')}
             </p>
           </div>
         )}
@@ -215,13 +228,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
           onClick={() => document.querySelector('input')?.click()}
         >
           <Upload className="mr-2 h-4 w-4" />
-          Select Files
+          {t('fileUploader.selectFiles')}
         </Button>
 
         {!areAllFilesUploaded && files.warehouseData && (
           <Alert className="mt-4">
             <AlertDescription>
-              Please upload all required files before proceeding
+              {t('fileUploader.uploadAllFiles')}
             </AlertDescription>
           </Alert>
         )}
