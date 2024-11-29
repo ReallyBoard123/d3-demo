@@ -22,6 +22,11 @@ interface FileStatus {
   warehouseData: boolean;
 }
 
+interface FileStatusIndicatorProps {
+  name: string;
+  isUploaded: boolean;
+}
+
 const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
   const { t } = useTranslation();
   const [files, setFiles] = React.useState<WarehouseFiles>({});
@@ -133,7 +138,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
     multiple: true
   });
 
-  const FileStatusIndicator: React.FC<{ name: string; isUploaded: boolean }> = ({ 
+
+  const clearFiles = () => {
+    setFiles({});
+    setError(null);
+    setUploadProgress(0);
+  };
+
+  const FileStatusIndicator: React.FC<FileStatusIndicatorProps> = ({ 
     name, 
     isUploaded 
   }) => (
@@ -147,16 +159,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onDataLoaded }) => {
         "text-sm",
         isUploaded ? "text-green-500" : "text-muted-foreground"
       )}>
-        {name} {isUploaded && "(uploaded)"}
+        {name} {isUploaded && t('fileUploader.uploaded')}
       </span>
     </div>
   );
-
-  const clearFiles = () => {
-    setFiles({});
-    setError(null);
-    setUploadProgress(0);
-  };
 
   return (
     <Card className="w-full max-w-lg mx-auto mt-8">

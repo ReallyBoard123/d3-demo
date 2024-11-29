@@ -13,6 +13,7 @@ import WarehouseCanvas from '../timeline/WarehouseCanvas';
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
 import { ActivityRecord } from '@/types';
 import { ActivityList } from './ActivityTimeline';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TimeRange {
   start: number;
@@ -31,7 +32,7 @@ const getTimeRange = (activities: ActivityRecord[]): TimeRange => {
   const endTimes = activities.map(a => a.endTime);
   
   return {
-    start: Math.max(0, Math.min(...startTimes) - 300), // 5 min buffer
+    start: Math.max(0, Math.min(...startTimes) - 300),
     end: Math.min(TIMELINE_CONSTANTS.SECONDS_PER_DAY, Math.max(...endTimes) + 300)
   };
 };
@@ -41,6 +42,7 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
   hiddenActivities,
   selectedDates
 }) => {
+  const { t } = useTranslation();
   const { processMetadata, layoutImage } = useProcessMetadata();
   const [state, setState] = React.useState<TimelineState>({
     currentTime: 0,
@@ -70,12 +72,9 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
   const updateTime = React.useCallback(() => {
     setState(prev => {
       const newTime = prev.currentTime + (prev.speed / 60);
-      
-      // Reset to start if we reach the end
       if (newTime >= timeRange.end) {
         return { ...prev, currentTime: timeRange.start };
       }
-      
       return { ...prev, currentTime: newTime };
     });
   }, [timeRange]);
@@ -128,7 +127,6 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
   }, [uniqueDates, state.selectedDate, timeRange.start]);
 
   React.useEffect(() => {
-    // Set initial time to the start of the first activity
     setState(prev => ({
       ...prev,
       currentTime: timeRange.start
@@ -140,7 +138,7 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          No dates available for timeline visualization
+          {t('timeline.noDataAvailable')}
         </AlertDescription>
       </Alert>
     );
@@ -150,7 +148,7 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Activity Timeline</CardTitle>
+          <CardTitle>{t('dashboard.activityTimeline')}</CardTitle>
           <div className="flex gap-4 items-center">
             <Select
               value={state.selectedDate}
@@ -161,7 +159,7 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
               }))}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select date" />
+                <SelectValue placeholder={t('timeline.selectDate')} />
               </SelectTrigger>
               <SelectContent>
                 {uniqueDates.map(date => (
@@ -180,15 +178,15 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
               }))}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select employee" />
+                <SelectValue placeholder={t('dashboard.selectEmployee')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={TIMELINE_CONSTANTS.ALL_EMPLOYEES}>
-                  All employees
+                  {t('dashboard.allEmployees')}
                 </SelectItem>
                 {uniqueEmployees.map(id => (
                   <SelectItem key={id} value={id}>
-                    Employee {id}
+                    {t('timeline.employee', { id })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -197,10 +195,10 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-      <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
-  <ResizablePanel defaultSize={60} minSize={60} maxSize={60}>
-    <div className="p-4">
-      <TimelineControls
+        <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
+          <ResizablePanel defaultSize={60} minSize={60} maxSize={60}>
+            <div className="p-4">
+              <TimelineControls
                 isPlaying={state.isPlaying}
                 speed={state.speed}
                 currentTime={state.currentTime}
@@ -211,21 +209,21 @@ export const TimelineVisualization: React.FC<BaseActivityProps> = ({
                 onTimeChange={(time: number) => setState(prev => ({ ...prev, currentTime: time }))}
               />
               <ActivityList activities={currentActivities} />
-    </div>
-  </ResizablePanel>
-  <ResizableHandle />
-  <ResizablePanel defaultSize={40} minSize={40} maxSize={40}>
-    {processMetadata && layoutImage && (
-      <div className="p-4 h-full">
-        <WarehouseCanvas
-          layoutImage={layoutImage}
-          metadata={processMetadata}
-          currentActivities={currentActivities}
-        />
-      </div>
-    )}
-  </ResizablePanel>
-</ResizablePanelGroup>
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={40} minSize={40} maxSize={40}>
+            {processMetadata && layoutImage && (
+              <div className="p-4 h-full">
+                <WarehouseCanvas
+                  layoutImage={layoutImage}
+                  metadata={processMetadata}
+                  currentActivities={currentActivities}
+                />
+              </div>
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </CardContent>
     </Card>
   );

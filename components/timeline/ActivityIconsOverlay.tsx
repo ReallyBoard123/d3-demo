@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from '@/hooks/useTranslation';
 
 type ActivityType = 'Drive' | 'Walk' | 'Stand' | 'Handle up' | 'Handle down' | 'Handle center' | 'Sit' | 'Unknown';
 
@@ -30,57 +31,56 @@ const ACTIVITY_ICONS: Record<ActivityType, LucideIcon> = {
   'Unknown': CircleHelp
 };
 
-// Pre-calculated optimal positions for 1-8 employees relative to center
 export const EMPLOYEE_POSITIONS = {
-  1: [{ x: 0, y: 0 }],  // Center
-  2: [  // Left and right
+  1: [{ x: 0, y: 0 }],
+  2: [
     { x: -0.6, y: 0 },
     { x: 0.6, y: 0 }
   ],
-  3: [  // Triangle formation
-    { x: -0.5, y: -0.3 },  // Top left
-    { x: 0.5, y: -0.3 },   // Top right
-    { x: 0, y: 0.6 }       // Bottom
+  3: [
+    { x: -0.5, y: -0.3 },
+    { x: 0.5, y: -0.3 },
+    { x: 0, y: 0.6 }
   ],
-  4: [  // Square formation
-    { x: -0.4, y: -0.4 },  // Top left
-    { x: 0.4, y: -0.4 },   // Top right
-    { x: 0.4, y: 0.4 },    // Bottom right
-    { x: -0.4, y: 0.4 }    // Bottom left
+  4: [
+    { x: -0.4, y: -0.4 },
+    { x: 0.4, y: -0.4 },
+    { x: 0.4, y: 0.4 },
+    { x: -0.4, y: 0.4 }
   ],
-  5: [  // Pentagon formation
-    { x: 0, y: -0.6 },     // Top
-    { x: 0.6, y: -0.2 },   // Upper right
-    { x: 0.4, y: 0.5 },    // Lower right
-    { x: -0.4, y: 0.5 },   // Lower left
-    { x: -0.6, y: -0.2 }   // Upper left
+  5: [
+    { x: 0, y: -0.6 },
+    { x: 0.6, y: -0.2 },
+    { x: 0.4, y: 0.5 },
+    { x: -0.4, y: 0.5 },
+    { x: -0.6, y: -0.2 }
   ],
-  6: [  // Hexagon formation
-    { x: -0.5, y: -0.4 },  // Top left
-    { x: 0.5, y: -0.4 },   // Top right
-    { x: 0.6, y: 0 },      // Right
-    { x: 0.3, y: 0.5 },    // Bottom right
-    { x: -0.3, y: 0.5 },   // Bottom left
-    { x: -0.6, y: 0 }      // Left
+  6: [
+    { x: -0.5, y: -0.4 },
+    { x: 0.5, y: -0.4 },
+    { x: 0.6, y: 0 },
+    { x: 0.3, y: 0.5 },
+    { x: -0.3, y: 0.5 },
+    { x: -0.6, y: 0 }
   ],
-  7: [  // Heptagon formation
-    { x: 0, y: -0.6 },     // Top
-    { x: 0.5, y: -0.4 },   // Upper right
-    { x: 0.6, y: 0.1 },    // Right
-    { x: 0.3, y: 0.5 },    // Lower right
-    { x: -0.3, y: 0.5 },   // Lower left
-    { x: -0.6, y: 0.1 },   // Left
-    { x: -0.5, y: -0.4 }   // Upper left
+  7: [
+    { x: 0, y: -0.6 },
+    { x: 0.5, y: -0.4 },
+    { x: 0.6, y: 0.1 },
+    { x: 0.3, y: 0.5 },
+    { x: -0.3, y: 0.5 },
+    { x: -0.6, y: 0.1 },
+    { x: -0.5, y: -0.4 }
   ],
-  8: [  // Octagon formation
-    { x: 0, y: -0.6 },     // Top
-    { x: 0.5, y: -0.4 },   // Upper right
-    { x: 0.6, y: 0.1 },    // Right
-    { x: 0.3, y: 0.5 },    // Lower right
-    { x: -0.3, y: 0.5 },   // Lower left
-    { x: -0.6, y: 0.1 },   // Left
-    { x: -0.5, y: -0.4 },  // Upper left
-    { x: 0, y: 0 }         // Center
+  8: [
+    { x: 0, y: -0.6 },
+    { x: 0.5, y: -0.4 },
+    { x: 0.6, y: 0.1 },
+    { x: 0.3, y: 0.5 },
+    { x: -0.3, y: 0.5 },
+    { x: -0.6, y: 0.1 },
+    { x: -0.5, y: -0.4 },
+    { x: 0, y: 0 }
   ]
 } as const;
 
@@ -93,11 +93,13 @@ interface ActivityIconsOverlayProps {
     color: string;
     employeeId: string;
     size: number;
-    placement?: { x: number; y: number };  // Optional placement override
+    placement?: { x: number; y: number };
   }>;
 }
 
 export const ActivityIconsOverlay: React.FC<ActivityIconsOverlayProps> = ({ activities }) => {
+  const { t, translateActivity } = useTranslation();
+
   const getTextColor = (bgColor: string): string => {
     const rgb = parseInt(bgColor.slice(1), 16);
     const brightness = ((rgb >> 16) * 0.299 + ((rgb >> 8) & 255) * 0.587 + (rgb & 255) * 0.114) / 255;
@@ -140,8 +142,8 @@ export const ActivityIconsOverlay: React.FC<ActivityIconsOverlayProps> = ({ acti
               </TooltipTrigger>
               <TooltipContent>
                 <div className="text-sm">
-                  <p>Employee: {activity.employeeId}</p>
-                  <p>Activity: {activity.activity}</p>
+                  <p>{t('warehouseCanvas.tooltip.employee', { id: activity.employeeId })}</p>
+                  <p>{t('warehouseCanvas.tooltip.activity', { activity: translateActivity(activity.activity) })}</p>
                 </div>
               </TooltipContent>
             </Tooltip>

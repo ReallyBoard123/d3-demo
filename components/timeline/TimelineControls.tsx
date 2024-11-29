@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
 import { TIMELINE_CONSTANTS } from '@/types/timeline';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TimeRange {
   start: number;
@@ -31,6 +32,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   onSpeedChange,
   onTimeChange,
 }) => {
+  const { t } = useTranslation();
+
   const formatTime = (seconds: number) => {
     return format(new Date(`${selectedDate}T00:00:00`).setSeconds(seconds), "HH:mm:ss");
   };
@@ -42,7 +45,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           variant="outline"
           size="icon"
           onClick={onPlayPause}
-          aria-label={isPlaying ? "Pause" : "Play"}
+          aria-label={isPlaying ? t('timeline.pause') : t('timeline.play')}
+          title={isPlaying ? t('timeline.pauseTooltip') : t('timeline.playTooltip')}
         >
           {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </Button>
@@ -54,13 +58,14 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
               variant={speed === s ? "default" : "outline"}
               size="sm"
               onClick={() => onSpeedChange(s)}
+              title={t('timeline.speedTooltip', { speed: s })}
             >
               {s}x
             </Button>
           ))}
         </div>
 
-        <div className="text-sm font-medium">
+        <div className="text-sm font-medium" title={t('timeline.currentTime')}>
           {formatTime(currentTime)}
         </div>
       </div>
@@ -73,6 +78,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           step={1}
           onValueChange={([value]) => onTimeChange(value)}
           className="w-full"
+          aria-label={t('timeline.timelineSlider')}
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{formatTime(timeRange.start)}</span>

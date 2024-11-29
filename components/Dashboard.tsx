@@ -13,44 +13,45 @@ import { Progress } from './ui/progress';
 import TimelineVisualization from './visualizations/TimelineVisualization';
 import { ActivityRecord, BaseActivityProps, ChartConfig, ChartId, FilterSettings } from '@/types';
 import ActivityHeatmap from './visualizations/ActivityHeatmap';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationPath } from '@/config/translations/translations';
 
-
-const CHARTS: ChartConfig[] = [
+const createChartConfigs = (t: (key: TranslationPath) => string): readonly ChartConfig[] => [
   { 
     id: 'activity-timeline',
-    title: 'Activity Timeline', 
+    title: t('dashboard.activityTimeline'), 
     component: TimelineVisualization,
     fullWidth: true, 
     defaultVisible: true  
   },
   {
     id: 'activity-heatmap',
-    title: 'Activity Heat Map',
+    title: t('dashboard.regionHeatmap'),
     component: ActivityHeatmap,
     fullWidth: true,
     defaultVisible: true
   },
   { 
     id: 'activity-distribution', 
-    title: 'Activity Distribution', 
+    title: t('dashboard.activityDistribution'), 
     component: ActivityDistribution,
     defaultVisible: true
   },
   { 
     id: 'employee-activity', 
-    title: 'Employee Activity', 
+    title: t('dashboard.employeeActivity'), 
     component: EmployeeActivity,
     defaultVisible: true
   },
   { 
     id: 'peak-activity', 
-    title: 'Peak Activity Times', 
+    title: t('dashboard.peakActivityTimes'), 
     component: PeakActivityTimes,
     defaultVisible: true
   },
   { 
     id: 'region-heatmap', 
-    title: 'Region Heatmap', 
+    title: t('dashboard.regionHeatmap'), 
     component: RegionHeatmap,
     defaultVisible: true
   },
@@ -69,10 +70,11 @@ interface DateMetrics {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
+  const { t, translateActivity } = useTranslation();
   const globalScheme = useColorStore(state => state.globalScheme);
   const [loadingProgress, setLoadingProgress] = React.useState<number>(0);
+  const CHARTS = React.useMemo(() => createChartConfigs(t), [t]);
   
-  // Calculate basic sets - this is fast
   const basicMetadata = React.useMemo(() => {
     const uniqueEmployees = new Set<string>();
     const uniqueActivities = new Set<string>();
@@ -98,7 +100,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     const metrics: Record<string, DateMetrics> = {};
     const allEmployees = new Set(data.map(record => record.id));
     
-    // Pre-initialize all dates
     basicMetadata.dates.forEach(date => {
       metrics[date] = {
         employeeCount: 0,
@@ -107,7 +108,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       };
     });
   
-    // Create a map for faster lookups
     const dateEmployees = new Map<string, Set<string>>();
     
     data.forEach(record => {
@@ -119,7 +119,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       metrics[dateKey].totalDuration += record.duration;
     });
   
-    // Calculate missing employees for each date
     dateEmployees.forEach((presentEmployees, date) => {
       metrics[date].employeeCount = presentEmployees.size;
       metrics[date].missingEmployees = Array.from(allEmployees)
@@ -129,7 +128,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     return metrics;
   }, [data, basicMetadata.dates]);
 
-  // Construct full metadata
   const metadata = React.useMemo(() => ({
     totalRecords: data.length,
     dateRange: {
@@ -138,11 +136,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     },
     uniqueEmployees: basicMetadata.employeeCount,
     uniqueRegions: basicMetadata.regions.length,
-    uniqueActivities: basicMetadata.activities,
+    uniqueActivities: basicMetadata.activities.map(activity => translateActivity(activity)),
     expectedEmployeeCount: basicMetadata.employeeCount
-  }), [basicMetadata, data.length]);
+  }), [basicMetadata, data.length, translateActivity]);
 
-  // Initialize filter settings
   const [filterSettings, setFilterSettings] = React.useState<FilterSettings>(() => ({
     hiddenActivities: DEFAULT_HIDDEN_ACTIVITIES,
     selectedDates: new Set(
@@ -179,7 +176,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     filterSettings.isComparisonEnabled,
   ]);
 
-  // Loading effect
   React.useEffect(() => {
     const loadStages = [
       { progress: 25, delay: 100 },
@@ -207,10 +203,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm">
         <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg">
           <div className="flex flex-col space-y-2 text-center sm:text-left">
-            <h2 className="text-lg font-semibold">Loading Dashboard</h2>
+            <h2 className="text-lg font-semibold">{t('dashboard.loadingDashboard')}</h2>
             <Progress value={loadingProgress} className="w-full" />
             <p className="text-sm text-muted-foreground">
-              Preparing your analytics...
+              {t('dashboard.preparingAnalytics')}
             </p>
           </div>
         </div>
@@ -221,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Activity Dashboard</h1>
+        <h1 className="text-2xl font-semibold">{t('dashboard.title')}</h1>
         <SettingsSidebar 
           metadata={metadata}
           dateMetrics={dateMetrics}
