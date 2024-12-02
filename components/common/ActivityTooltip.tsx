@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/hooks/useTranslation'
 
 export interface ActivityEntry {
   dataKey: string;
@@ -9,7 +10,7 @@ export interface ActivityEntry {
 
 export interface DateRangeDisplay {
   selected: string;
-  comparison: string | null;
+  comparison: string | null
 }
 
 interface ActivityTooltipProps {
@@ -31,21 +32,24 @@ export const ActivityTooltip: React.FC<ActivityTooltipProps> = ({
   valueFormatter = (value) => `${value}`,
   labelKey = 'activity'
 }) => {
+  const { translateActivity } = useTranslation();
+  
   if (!active || !payload) return null;
 
   const selectedActivities = payload.filter(p => p.dataKey.includes('selected'));
   const comparisonActivities = payload.filter(p => p.dataKey.includes('comparison'));
 
   const formatActivityName = (dataKey: string): string => {
-    return dataKey
-      .replace('_selected', '')
-      .replace('_comparison', '')
-      .replace(labelKey, '');
-  };
+  const name = dataKey
+    .replace('_selected', '')
+    .replace('_comparison', '')
+    .replace(labelKey, '');
+  return translateActivity(name);
+};
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-      <p className="font-medium mb-2">{label}</p>
+      <p className="font-medium mb-2">{translateActivity(label || '')}</p>
       
       <div className="mb-3">
         <p className="text-sm text-gray-600 mb-1">

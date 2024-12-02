@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
+import { useTranslation } from '@/hooks/useTranslation';
 import BaseWarehouseCanvas, { 
   calculateRegionDimensions, 
   RegionDimensions, 
@@ -107,20 +108,26 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   activity,
   availableActivities,
   onActivityChange
-}) => (
-  <div className="absolute top-2 right-2 z-10 bg-card/90 backdrop-blur-sm p-2 rounded-lg shadow-sm border">
-    <Select value={activity} onValueChange={onActivityChange}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {availableActivities.map(act => (
-          <SelectItem key={act} value={act}>{act}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+}) => {
+  const { translateActivity } = useTranslation();
+  
+  return (
+    <div className="absolute top-2 right-2 z-10 bg-card/90 backdrop-blur-sm p-2 rounded-lg shadow-sm border">
+      <Select value={activity} onValueChange={onActivityChange}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue>{translateActivity(activity)}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {availableActivities.map(act => (
+            <SelectItem key={act} value={act}>
+              {translateActivity(act)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
 
 interface SingleHeatmapProps {
   activity: string;
@@ -226,6 +233,7 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
   hiddenActivities, 
   selectedDates 
 }) => {
+  const { t } = useTranslation();
   const { processMetadata, layoutImage } = useProcessMetadata();
   const [selectedActivities, setSelectedActivities] = React.useState<string[]>([
     'Handle up', 
@@ -255,9 +263,9 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
     <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Activity Heat Maps</CardTitle>
+          <CardTitle>{t('heatmap.title')}</CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-sm">Show Instances</span>
+            <span className="text-sm">{t('heatmap.showInstances')}</span>
             <Switch
               checked={showInstances}
               onCheckedChange={setShowInstances}
@@ -288,9 +296,10 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
           <p>
-            Color intensity indicates relative {showInstances ? 'frequency' : 'duration'} of activities in each region. 
-            {showInstances && ' Only instances longer than 5 seconds are counted. '}
-            Darker colors represent higher values.
+            {t('heatmap.colorIntensityInfo', { 
+              type: t(showInstances ? 'heatmap.frequency' : 'heatmap.duration')
+            })}
+            {showInstances && ` ${t('heatmap.instancesNote')}`} {t('heatmap.darkerColors')}
           </p>
         </div>
       </CardContent>

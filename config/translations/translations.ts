@@ -46,7 +46,13 @@ export const translations = {
       delete: 'Delete',
       loading: 'Loading...',
       error: 'Error',
-      success: 'Success'
+      success: 'Success',
+      comparison: {
+        vs: 'vs',
+      },
+      chart: {
+        noLabel: 'No label',
+      },
     },
     fileUploader: {
       title: 'Upload Warehouse Activity Data',
@@ -71,7 +77,29 @@ export const translations = {
       timelineSlider: 'Timeline position slider',
       noDataAvailable: 'No dates available for timeline visualization',
       selectDate: 'Select date',
-      employee: 'Employee {{id}}'
+      employee: 'Employee {{id}}',
+      noActivities: 'No activities at this time',
+    },
+    heatmap: {
+      title: 'Activity Heat Maps',
+      showInstances: 'Show Instances',
+      colorIntensityInfo: 'Color intensity indicates relative {{type}} of activities in each region.',
+      instancesNote: 'Only instances longer than 5 seconds are counted.',
+      darkerColors: 'Darker colors represent higher values.',
+      frequency: 'frequency',
+      duration: 'duration'
+    },
+    heatmapTooltip: {
+      duration: 'Duration',
+      totalInstances: 'Total Instances', 
+      percentageTotal: '% of Total',
+      seconds: 'sec',
+      greaterThan: '>'
+    },
+    activityTooltip: {
+      value: 'Value',  
+      comparison: 'Comparison',  
+      total: 'Total', 
     },
     warehouseCanvas: {
       loadingError: 'Failed to load layout image',
@@ -80,7 +108,14 @@ export const translations = {
         employee: 'Employee: {{id}}',
         region: 'Region: {{name}}'
       }
-    }
+    },
+    charts: {
+      activityDistribution: {
+        title: 'Activity Distribution',   
+        hoursLabel: 'Hours',  
+        hours: 'h'
+      }
+    },
   },
   de: {
     dashboard: {
@@ -129,7 +164,13 @@ export const translations = {
       delete: 'Löschen',
       loading: 'Laden...',
       error: 'Fehler',
-      success: 'Erfolg'
+      success: 'Erfolg',
+      comparison: {
+        vs: 'vs',
+      },
+      chart: {
+        noLabel: 'Kein Label',
+      },
     },
     fileUploader: {
       title: 'Lageraktivitätsdaten hochladen',
@@ -155,7 +196,29 @@ export const translations = {
       noDataAvailable: 'Keine Daten für die Zeitachsenvisualisierung verfügbar',
       selectDate: 'Datum auswählen',
       employee: 'Mitarbeiter {{id}}',
+      noActivities: 'Keine Aktivitäten zu diesem Zeitpunkt',
     },
+    heatmap: {
+      title: 'Aktivitäts-Heatmaps',
+      showInstances: 'Instanzen anzeigen',
+      colorIntensityInfo: 'Farbintensität zeigt relative {{type}} der Aktivitäten in jeder Region.',
+      instancesNote: 'Nur Instanzen länger als 5 Sekunden werden gezählt.',
+      darkerColors: 'Dunklere Farben stellen höhere Werte dar.',
+      frequency: 'Häufigkeit',
+      duration: 'Dauer'
+    },
+    heatmapTooltip: {
+      duration: 'Dauer',
+      totalInstances: 'Gesamtinstanzen', 
+      percentageTotal: '% des Gesamts',
+      seconds: 'Sek',
+      greaterThan: '>'
+    },
+    activityTooltip: {
+      value: 'Wert',
+      comparison: 'Vergleich',
+      total: 'Gesamt',
+    },    
     warehouseCanvas: {
       loadingError: 'Layout-Bild konnte nicht geladen werden',
       tooltip: {
@@ -163,6 +226,13 @@ export const translations = {
         employee: 'Mitarbeiter: {{id}}',
         region: 'Region: {{name}}'
       }
+  },
+  charts: {
+    activityDistribution: {
+      title: 'Aktivitätsverteilung',
+      hoursLabel: 'Stunden',
+      hours: 'St'
+    }
   }
   }
 } as const;

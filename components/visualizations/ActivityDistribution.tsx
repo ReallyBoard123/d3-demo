@@ -5,6 +5,7 @@ import { ActivityTooltip } from '@/components/common/ActivityTooltip';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { BaseActivityProps } from '@/types/activity';
 
 interface ProcessedData {
@@ -22,9 +23,10 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
   isComparisonEnabled,
   chartId
 }) => {
-  const [inactiveActivities, setInactiveActivities] = React.useState<Set<string>>(new Set());
+  const { t, translateActivity } = useTranslation();
   const getChartColors = useColorStore(state => state.getChartColors);
   const colors = getChartColors(chartId);
+  const [inactiveActivities, setInactiveActivities] = React.useState<Set<string>>(new Set());
 
   const dateDisplay = React.useMemo(() => ({
     selected: formatDateRange(selectedDates),
@@ -95,18 +97,18 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
 
   const legendItems: LegendItem[] = React.useMemo(() => 
     activities.map((activity, index) => ({
-      label: activity,
+      label: translateActivity(activity),
       color: colors.primary[index % colors.primary.length],
-      value: `${processedData[index].selected.toFixed(1)}h`,
+      value: `${processedData[index].selected.toFixed(1)}${t('charts.activityDistribution.hours')}`,
       inactive: inactiveActivities.has(activity),
       onClick: () => toggleActivity(activity),
       ...(isComparisonEnabled && processedData[index].comparison !== undefined ? {
         comparison: {
-          value: `${processedData[index].comparison.toFixed(1)}h`,
+          value: `${processedData[index].comparison.toFixed(1)}${t('charts.activityDistribution.hours')}`,
           color: colors.comparison[index % colors.comparison.length]
         }
       } : {})
-    })), [activities, processedData, colors, inactiveActivities, isComparisonEnabled]);
+    })), [activities, processedData, colors, inactiveActivities, isComparisonEnabled, t, translateActivity]);
 
   const getBarColor = (entry: ProcessedData) => {
     if (inactiveActivities.has(entry.activity)) {
@@ -128,11 +130,11 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Activity Distribution</CardTitle>
+          <CardTitle>{t('charts.activityDistribution.title')}</CardTitle>
           <div className="text-sm font-normal text-gray-500">
             <div>{dateDisplay.selected}</div>
             {isComparisonEnabled && dateDisplay.comparison && (
-              <div>vs {dateDisplay.comparison}</div>
+              <div>{t('common.comparison.vs')} {dateDisplay.comparison}</div>
             )}
           </div>
         </div>
@@ -141,17 +143,26 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={processedData}>
-              <XAxis dataKey="activity" />
+              <XAxis 
+                dataKey="activity" 
+                tickFormatter={translateActivity}
+              />
               <YAxis 
-                label={{ value: 'Hours', angle: -90, position: 'insideLeft' }}
-                tickFormatter={(value) => `${value}h`}
+                label={{ 
+                  value: t('charts.activityDistribution.hoursLabel'), 
+                  angle: -90, 
+                  position: 'insideLeft' 
+                }}
+                tickFormatter={(value) => `${value}${t('charts.activityDistribution.hours')}`}
               />
               <Tooltip
                 content={
                   <ActivityTooltip
                     dateDisplay={dateDisplay}
                     isComparisonEnabled={isComparisonEnabled}
-                    valueFormatter={(value) => `${value.toFixed(2)}h`}
+                    valueFormatter={(value) => 
+                      `${value.toFixed(2)}${t('charts.activityDistribution.hours')}`
+                    }
                   />
                 }
               />

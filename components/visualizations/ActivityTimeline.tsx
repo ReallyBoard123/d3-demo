@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ActivityRecord, EMPLOYEE_COLORS } from '@/types';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ActivityListProps {
  activities: ActivityRecord[];
@@ -13,6 +14,8 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   activities,
   className 
  }) => {
+  const { t, translateActivity } = useTranslation();
+  
   const getTextColor = (bgColor: string): string => {
     const hex = bgColor.replace('#', '');
     const r = parseInt(hex.slice(0, 2), 16);
@@ -45,7 +48,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
                 {activity.id}
               </Badge>
               <span className="text-sm font-medium">
-                {activity.activity}
+                {translateActivity(activity.activity)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -63,7 +66,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
       })}
       {activities.length === 0 && (
         <div className="text-center text-muted-foreground py-8">
-          No activities at this time
+          {t('timeline.noActivities')}
         </div>
       )}
     </div>
@@ -81,7 +84,9 @@ export const TimelineIndicator: React.FC<TimelineIndicatorProps> = ({
  isPlaying,
  className
 }) => {
- return (
+  useTranslation();
+  
+  return (
    <div className={cn("flex items-center gap-2", className)}>
      <div className={cn(
        "w-2 h-2 rounded-full",

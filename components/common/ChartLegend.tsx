@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface LegendItem {
   label: string;
@@ -24,6 +25,8 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   className,
   showComparison 
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className={cn("flex flex-wrap gap-4 justify-center", className)}>
       {items.map((item, index) => (
@@ -58,7 +61,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
               )}
               {showComparison && item.comparison && (
                 <span className="text-sm text-gray-400">
-                  vs {item.comparison.value}
+                  {t('dashboard.vsText')} {item.comparison.value}
                 </span>
               )}
             </div>

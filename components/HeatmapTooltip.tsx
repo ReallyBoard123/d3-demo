@@ -6,7 +6,9 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { formatDuration } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { ActivityRecord } from '@/types';
+import { TranslationPath } from '@/config/translations/translations';
 
 interface RegionStats {
   duration: number;
@@ -50,7 +52,7 @@ interface HeatmapTooltipOverlayProps {
   data: ActivityRecord[];
 }
 
-const calculateDurationCategories = (durations: number[]): DurationCategory[] => {
+const calculateDurationCategories = (durations: number[], t: (key: TranslationPath) => string): DurationCategory[] => {
   if (durations.length === 0) return [];
   
   const sortedDurations = durations.sort((a, b) => a - b);
@@ -69,16 +71,16 @@ const calculateDurationCategories = (durations: number[]): DurationCategory[] =>
   
   durations.forEach(duration => {
     if (duration <= boundaries[1]) {
-      const range = `${boundaries[0]}-${boundaries[1].toFixed(0)}s`;
+      const range = `${boundaries[0]}-${boundaries[1].toFixed(0)}${t('heatmapTooltip.seconds')}`;
       categories.set(range, (categories.get(range) || 0) + 1);
     } else if (duration <= boundaries[2]) {
-      const range = `${boundaries[1].toFixed(0)}-${boundaries[2].toFixed(0)}s`;
+      const range = `${boundaries[1].toFixed(0)}-${boundaries[2].toFixed(0)}${t('heatmapTooltip.seconds')}`;
       categories.set(range, (categories.get(range) || 0) + 1);
     } else if (duration <= boundaries[3]) {
-      const range = `${boundaries[2].toFixed(0)}-${boundaries[3].toFixed(0)}s`;
+      const range = `${boundaries[2].toFixed(0)}-${boundaries[3].toFixed(0)}${t('heatmapTooltip.seconds')}`;
       categories.set(range, (categories.get(range) || 0) + 1);
     } else {
-      const range = `>${boundaries[3].toFixed(0)}s`;
+      const range = `${t('heatmapTooltip.greaterThan')}${boundaries[3].toFixed(0)}${t('heatmapTooltip.seconds')}`;
       categories.set(range, (categories.get(range) || 0) + 1);
     }
   });
@@ -86,58 +88,68 @@ const calculateDurationCategories = (durations: number[]): DurationCategory[] =>
   return Array.from(categories.entries())
     .map(([range, count]) => ({ range, count }))
     .sort((a, b) => {
-      const aStart = parseInt(a.range.split('-')[0].replace('>', ''));
-      const bStart = parseInt(b.range.split('-')[0].replace('>', ''));
+      const aStart = parseInt(a.range.split('-')[0].replace(/[^0-9]/g, ''));
+      const bStart = parseInt(b.range.split('-')[0].replace(/[^0-9]/g, ''));
       return aStart - bStart;
     });
 };
 
-const DurationTooltipContent: React.FC<DurationTooltipContentProps> = ({ stats }) => (
-  <div className="p-2 space-y-2">
-    <div className="flex justify-between items-center gap-4">
-      <span className="font-medium text-sm">{stats.activity}</span>
-      <span className="text-xs text-muted-foreground">{stats.region}</span>
-    </div>
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm gap-4">
-        <span className="text-muted-foreground">Duration:</span>
-        <span className="font-medium">{formatDuration(stats.duration)}</span>
+const DurationTooltipContent: React.FC<DurationTooltipContentProps> = ({ stats }) => {
+  const { t, translateActivity } = useTranslation();
+  
+  return (
+    <div className="p-2 space-y-2">
+      <div className="flex justify-between items-center gap-4">
+        <span className="font-medium text-sm">{translateActivity(stats.activity)}</span>
+        <span className="text-xs text-muted-foreground">{stats.region}</span>
       </div>
-      <div className="flex justify-between text-sm gap-4">
-        <span className="text-muted-foreground">% of Total:</span>
-        <span className="font-medium">{stats.percentage.toFixed(1)}%</span>
+      <div className="space-y-1">
+        <div className="flex justify-between text-sm gap-4">
+          <span className="text-muted-foreground">{t('heatmapTooltip.duration')}:</span>
+          <span className="font-medium">{formatDuration(stats.duration)}</span>
+        </div>
+        <div className="flex justify-between text-sm gap-4">
+          <span className="text-muted-foreground">{t('heatmapTooltip.percentageTotal')}:</span>
+          <span className="font-medium">{stats.percentage.toFixed(1)}%</span>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const InstanceTooltipContent: React.FC<InstanceTooltipContentProps> = ({ 
   stats, 
   instanceCategories 
-}) => (
-  <div className="p-2 space-y-2">
-    <div className="flex justify-between items-center gap-4">
-      <span className="font-medium text-sm">{stats.activity}</span>
-      <span className="text-xs text-muted-foreground">{stats.region}</span>
-    </div>
-    <div className="space-y-1">
-      {instanceCategories.map(({ range, count }) => (
-        <div key={range} className="flex justify-between text-sm gap-4">
-          <span className="text-muted-foreground">{range}:</span>
-          <span className="font-medium">{count}</span>
+}) => {
+  const { t, translateActivity } = useTranslation();
+  
+  return (
+    <div className="p-2 space-y-2">
+      <div className="flex justify-between items-center gap-4">
+        <span className="font-medium text-sm">{translateActivity(stats.activity)}</span>
+        <span className="text-xs text-muted-foreground">{stats.region}</span>
+      </div>
+      <div className="space-y-1">
+        {instanceCategories.map(({ range, count }) => (
+          <div key={range} className="flex justify-between text-sm gap-4">
+            <span className="text-muted-foreground">{range}:</span>
+            <span className="font-medium">{count}</span>
+          </div>
+        ))}
+        <div className="flex justify-between text-sm gap-4 pt-1 border-t">
+          <span className="text-muted-foreground">{t('heatmapTooltip.totalInstances')}:</span>
+          <span className="font-medium">{stats.count}</span>
         </div>
-      ))}
-      <div className="flex justify-between text-sm gap-4 pt-1 border-t">
-        <span className="text-muted-foreground">Total Instances:</span>
-        <span className="font-medium">{stats.count}</span>
-      </div>
-      <div className="flex justify-between text-sm gap-4">
-        <span className="text-muted-foreground">% of Total:</span>
-        <span className="font-medium">{stats.percentage.toFixed(1)}%</span>
+        <div className="flex justify-between text-sm gap-4">
+          <span className="text-muted-foreground">{t('heatmapTooltip.percentageTotal')}:</span>
+          <span className="font-medium">{stats.percentage.toFixed(1)}%</span>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+
+
 
 export const HeatmapTooltipOverlay: React.FC<HeatmapTooltipOverlayProps> = ({ 
   regions, 
@@ -145,6 +157,7 @@ export const HeatmapTooltipOverlay: React.FC<HeatmapTooltipOverlayProps> = ({
   showInstances, 
   data 
 }) => {
+  const { t } = useTranslation();
   const [scale, setScale] = React.useState(1);
 
   React.useEffect(() => {
@@ -178,7 +191,8 @@ export const HeatmapTooltipOverlay: React.FC<HeatmapTooltipOverlayProps> = ({
               record.activity === stats.activity &&
               record.duration > 5
             )
-            .map(record => record.duration)
+            .map(record => record.duration),
+          t
         ) : [];
 
         return (
