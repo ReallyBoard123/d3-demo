@@ -99,7 +99,8 @@ export const translations = {
     activityTooltip: {
       value: 'Value',  
       comparison: 'Comparison',  
-      total: 'Total', 
+      total: 'Total',
+      selected: 'Selected Period',        
     },
     warehouseCanvas: {
       loadingError: 'Failed to load layout image',
@@ -114,6 +115,9 @@ export const translations = {
         title: 'Activity Distribution',   
         hoursLabel: 'Hours',  
         hours: 'h'
+      },
+      heatmap: {
+        activityIntensity: 'Activity Intensity',
       }
     },
   },
@@ -218,6 +222,7 @@ export const translations = {
       value: 'Wert',
       comparison: 'Vergleich',
       total: 'Gesamt',
+      selected: 'Ausgewählter Zeitraum',
     },    
     warehouseCanvas: {
       loadingError: 'Layout-Bild konnte nicht geladen werden',
@@ -232,6 +237,9 @@ export const translations = {
       title: 'Aktivitätsverteilung',
       hoursLabel: 'Stunden',
       hours: 'St'
+    },
+    heatmap: {
+      activityIntensity: 'Aktivitätsintensität',
     }
   }
   }

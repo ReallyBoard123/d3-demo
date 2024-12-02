@@ -5,6 +5,7 @@ import { ActivityTooltip } from '@/components/common/ActivityTooltip';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { BaseActivityProps } from '@/types/activity';
 
 interface HourData {
@@ -21,6 +22,7 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
   isComparisonEnabled,
   chartId
 }) => {
+  const { t } = useTranslation();
   const getChartColors = useColorStore(state => state.getChartColors);
   const colors = getChartColors(chartId);
 
@@ -36,21 +38,17 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
       ...(isComparisonEnabled ? { comparison: 0 } : {})
     }));
 
-    // Process selected dates data
     data.forEach(record => {
-      if (hiddenActivities.has(record.activity)) return;
-      if (!selectedDates.has(record.date)) return;
+      if (hiddenActivities.has(record.activity) || !selectedDates.has(record.date)) return;
 
       const startHour = Math.floor(record.startTime / 3600) % 24;
       const duration = record.duration / 3600;
       hours[startHour].selected += duration;
     });
 
-    // Process comparison dates if enabled
     if (isComparisonEnabled) {
       data.forEach(record => {
-        if (hiddenActivities.has(record.activity)) return;
-        if (!comparisonDates.has(record.date)) return;
+        if (hiddenActivities.has(record.activity) || !comparisonDates.has(record.date)) return;
 
         const startHour = Math.floor(record.startTime / 3600) % 24;
         const duration = record.duration / 3600;
@@ -61,35 +59,33 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
     return hours.map(h => ({
       ...h,
       selected: Number(h.selected.toFixed(2)),
-      ...(isComparisonEnabled ? { 
-        comparison: Number(h.comparison!.toFixed(2)) 
-      } : {})
+      ...(isComparisonEnabled ? { comparison: Number(h.comparison!.toFixed(2)) } : {})
     }));
   }, [data, hiddenActivities, selectedDates, comparisonDates, isComparisonEnabled]);
 
   const legendItems: LegendItem[] = React.useMemo(() => [
     {
-      label: 'Selected Period',
+      label: t('activityTooltip.selected'),
       color: colors.primary[0],
-      value: `${hourlyData.reduce((sum, h) => sum + h.selected, 0).toFixed(1)}h total`,
+      value: `${hourlyData.reduce((sum, h) => sum + h.selected, 0).toFixed(1)}${t('dashboard.hoursAbbreviation')} ${t('activityTooltip.total')}`,
       ...(isComparisonEnabled ? {
         comparison: {
           color: colors.comparison[0],
-          value: `${hourlyData.reduce((sum, h) => sum + (h.comparison || 0), 0).toFixed(1)}h total`
+          value: `${hourlyData.reduce((sum, h) => sum + (h.comparison || 0), 0).toFixed(1)}${t('dashboard.hoursAbbreviation')} ${t('activityTooltip.total')}`
         }
       } : {})
     }
-  ], [hourlyData, colors, isComparisonEnabled]);
+  ], [hourlyData, colors, isComparisonEnabled, t]);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Peak Activity Times</CardTitle>
+          <CardTitle>{t('dashboard.peakActivityTimes')}</CardTitle>
           <div className="text-sm font-normal text-gray-500">
             <div>{dateDisplay.selected}</div>
             {isComparisonEnabled && dateDisplay.comparison && (
-              <div>vs {dateDisplay.comparison}</div>
+              <div>{t('common.comparison.vs')} {dateDisplay.comparison}</div>
             )}
           </div>
         </div>
@@ -97,38 +93,40 @@ export const PeakActivityTimes: React.FC<BaseActivityProps> = ({
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={hourlyData}>
+            <LineChart data={hourlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <XAxis dataKey="hour" />
               <YAxis 
-                label={{ value: 'Hours of Activity', angle: -90, position: 'insideLeft' }}
-                tickFormatter={(value) => `${value}h`}
+                label={{ value: t('charts.activityDistribution.hoursLabel'), angle: -90, position: 'insideLeft' }}
+                tickFormatter={(value) => `${value}${t('dashboard.hoursAbbreviation').trim()}`}
+                width={100}  // Control width
+                style={{ whiteSpace: 'pre' }} // Preserve whitespace
               />
               <Tooltip
-                content={
-                  <ActivityTooltip
-                    dateDisplay={dateDisplay}
-                    isComparisonEnabled={isComparisonEnabled}
-                    valueFormatter={(value) => `${value.toFixed(2)}h`}
-                    labelKey="hour"
-                  />
-                }
+              content={
+                <ActivityTooltip
+                dateDisplay={dateDisplay}
+                isComparisonEnabled={isComparisonEnabled}
+                valueFormatter={(value) => `${value.toFixed(2)}${t('dashboard.hoursAbbreviation')}`}
+                labelKey="hour"
+                />
+              }
               />
               <Line 
-                type="monotone" 
-                dataKey="selected"
-                stroke={colors.primary[0]}
-                strokeWidth={2}
-                dot={false}
+              type="monotone" 
+              dataKey="selected"
+              stroke={colors.primary[0]}
+              strokeWidth={2}
+              dot={false}
               />
               {isComparisonEnabled && (
-                <Line 
-                  type="monotone" 
-                  dataKey="comparison"
-                  stroke={colors.comparison[0]}
-                  strokeWidth={2}
-                  dot={false}
-                  strokeDasharray="5 5"
-                />
+              <Line 
+                type="monotone" 
+                dataKey="comparison"
+                stroke={colors.comparison[0]}
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="5 5"
+              />
               )}
             </LineChart>
           </ResponsiveContainer>

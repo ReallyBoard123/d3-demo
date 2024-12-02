@@ -32,7 +32,7 @@ export const ActivityTooltip: React.FC<ActivityTooltipProps> = ({
   valueFormatter = (value) => `${value}`,
   labelKey = 'activity'
 }) => {
-  const { translateActivity } = useTranslation();
+  const { t, translateActivity } = useTranslation();
   
   if (!active || !payload) return null;
 
@@ -40,12 +40,20 @@ export const ActivityTooltip: React.FC<ActivityTooltipProps> = ({
   const comparisonActivities = payload.filter(p => p.dataKey.includes('comparison'));
 
   const formatActivityName = (dataKey: string): string => {
-  const name = dataKey
-    .replace('_selected', '')
-    .replace('_comparison', '')
-    .replace(labelKey, '');
-  return translateActivity(name);
-};
+    const name = dataKey
+      .replace('_selected', '')
+      .replace('_comparison', '')
+      .replace(labelKey, '');
+      
+    if (name === 'selected') {
+      return t('activityTooltip.selected');
+    }
+    if (name === 'comparison') {
+      return t('activityTooltip.comparison');
+    }
+  
+    return translateActivity(name);
+  };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">

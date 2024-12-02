@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { BaseActivityProps } from '@/types/activity';
 import { ACTIVITY_CONFIG } from '@/config/activity';
 
@@ -27,6 +28,7 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
   isComparisonEnabled,
   chartId
 }) => {
+  const { t } = useTranslation();
   const getChartColors = useColorStore(state => state.getChartColors);
   const colors = getChartColors(chartId);
   const baseColor = colors.primary[0];
@@ -84,17 +86,17 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
 
   const legendItems: LegendItem[] = React.useMemo(() => [
     {
-      label: 'Activity Intensity',
+      label: t('charts.heatmap.activityIntensity'),
       color: colors.primary[0],
-      value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`,
+      value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}${t('dashboard.hoursAbbreviation')}`,
       ...(isComparisonEnabled ? {
         comparison: {
           color: colors.comparison[0],
-          value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}h`
+          value: `0-${ACTIVITY_CONFIG.MAX_HOURS_PER_DAY}${t('dashboard.hoursAbbreviation')}`
         }
       } : {})
     }
-  ], [colors, isComparisonEnabled]);
+  ], [colors, isComparisonEnabled, t]);
 
   const getColorIntensity = (intensity: number): string => {
     const hex = Math.floor(intensity * 255).toString(16).padStart(2, '0');
@@ -105,11 +107,11 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Region Activity Heat Map</CardTitle>
+          <CardTitle>{t('dashboard.regionHeatmap')}</CardTitle>
           <div className="text-sm font-normal text-gray-500">
             <div>{dateDisplay.selected}</div>
             {isComparisonEnabled && dateDisplay.comparison && (
-              <div>vs {dateDisplay.comparison}</div>
+              <div>{t('common.comparison.vs')} {dateDisplay.comparison}</div>
             )}
           </div>
         </div>
@@ -146,10 +148,10 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
                   className="text-xs mt-1"
                   style={{ color: selectedIntensity > 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)' }}
                 >
-                  {selectedHours.toFixed(1)}h
+                  {selectedHours.toFixed(1)}{t('dashboard.hoursAbbreviation')}
                   {isComparisonEnabled && comparisonHours !== undefined && (
                     <span className="ml-2">
-                      vs {comparisonHours.toFixed(1)}h
+                      {t('common.comparison.vs')} {comparisonHours.toFixed(1)}{t('dashboard.hoursAbbreviation')}
                     </span>
                   )}
                 </p>
