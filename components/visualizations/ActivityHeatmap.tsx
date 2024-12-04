@@ -2,8 +2,12 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Settings2 } from "lucide-react";
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRegionStore } from '@/stores/useRegionStore';
 import BaseWarehouseCanvas, { 
   calculateRegionDimensions, 
   RegionDimensions, 
@@ -12,6 +16,7 @@ import BaseWarehouseCanvas, {
 import { formatDuration } from '@/lib/utils';
 import type { ActivityRecord, ProcessMetadata, BaseActivityProps } from '@/types';
 import { HeatmapTooltipOverlay } from '../HeatmapTooltip';
+import RegionManagement from '../RegionManagement';
 
 // Constants and Types
 const INSTANCE_DURATION_THRESHOLD = 5; // seconds
@@ -47,54 +52,18 @@ const getHeatmapColor = (intensity: number): string => {
   return `rgba(${range.r},${range.g},${range.b},${range.a})`;
 };
 
-const calculateActivityStats = (
+const processCombinedRegions = (
   data: ActivityRecord[],
-  activity: string,
-  showInstances: boolean
-): HeatData => {
-  const regionStats = new Map<string, RegionStats>();
-  let maxDuration = 0;
-  let maxCount = 0;
-  let totalDuration = 0;
-  let totalCount = 0;
-
-  // First pass to calculate totals
-  data.forEach(record => {
-    if (record.activity !== activity) return;
-    totalDuration += record.duration;
-    if (!showInstances || (showInstances && record.duration > INSTANCE_DURATION_THRESHOLD)) {
-      totalCount++;
-    }
+  combinations: Array<{ name: string; regions: string[] }>
+): ActivityRecord[] => {
+  return data.map(record => {
+    const combination = combinations.find(c => 
+      c.regions.includes(record.region)
+    );
+    return combination 
+      ? { ...record, region: combination.name }
+      : record;
   });
-
-  // Second pass to calculate region stats
-  data.forEach(record => {
-    if (record.activity !== activity) return;
-    
-    const current = regionStats.get(record.region) || { 
-      duration: 0, 
-      count: 0,
-      avgDuration: 0,
-      percentage: 0,
-      activity,
-      region: record.region
-    };
-    
-    current.duration += record.duration;
-    if (!showInstances || (showInstances && record.duration > INSTANCE_DURATION_THRESHOLD)) {
-      current.count++;
-    }
-    current.avgDuration = current.duration / current.count;
-    current.percentage = showInstances 
-      ? (current.count / totalCount) * 100
-      : (current.duration / totalDuration) * 100;
-    
-    regionStats.set(record.region, current);
-    maxDuration = Math.max(maxDuration, current.duration);
-    maxCount = Math.max(maxCount, current.count);
-  });
-
-  return { regionStats, maxDuration, maxCount, totalDuration, totalCount };
 };
 
 // Components
@@ -137,6 +106,7 @@ interface SingleHeatmapProps {
   availableActivities: string[];
   onActivityChange: (activity: string) => void;
   showInstances: boolean;
+  useCombinedRegions: boolean;
 }
 
 const SingleHeatmap: React.FC<SingleHeatmapProps> = React.memo(({ 
@@ -146,18 +116,64 @@ const SingleHeatmap: React.FC<SingleHeatmapProps> = React.memo(({
   layoutImage,
   availableActivities,
   onActivityChange,
-  showInstances
+  showInstances,
+  useCombinedRegions
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [tooltipRegions, setTooltipRegions] = React.useState<Map<string, {
     dimensions: RegionDimensions;
     stats: RegionStats;
   }>>(new Map());
+  const { combinations } = useRegionStore();
 
-  const calculateHeatData = React.useCallback(() => 
-    calculateActivityStats(data, activity, showInstances),
-    [data, activity, showInstances]
-  );
+  const { excludedRegions } = useRegionStore();
+
+  const processedData = React.useMemo(() => {
+    const filteredData = data.filter(record => !excludedRegions.has(record.region));
+    return useCombinedRegions ? processCombinedRegions(filteredData, combinations) : filteredData;
+  }, [data, combinations, useCombinedRegions, excludedRegions]);
+
+  const calculateHeatData = React.useCallback((): HeatData => {
+    const regionStats = new Map<string, RegionStats>();
+    let maxDuration = 0;
+    let maxCount = 0;
+    let totalDuration = 0;
+    let totalCount = 0;
+
+    processedData.forEach(record => {
+      if (record.activity !== activity) return;
+      
+      totalDuration += record.duration;
+      if (!showInstances || record.duration > INSTANCE_DURATION_THRESHOLD) {
+        totalCount++;
+      }
+
+      const current = regionStats.get(record.region) || {
+        duration: 0,
+        count: 0,
+        avgDuration: 0,
+        percentage: 0,
+        activity,
+        region: record.region
+      };
+
+      current.duration += record.duration;
+      if (!showInstances || record.duration > INSTANCE_DURATION_THRESHOLD) {
+        current.count++;
+      }
+
+      current.avgDuration = current.duration / current.count;
+      current.percentage = showInstances 
+        ? (current.count / totalCount) * 100
+        : (current.duration / totalDuration) * 100;
+
+      regionStats.set(record.region, current);
+      maxDuration = Math.max(maxDuration, current.duration);
+      maxCount = Math.max(maxCount, current.count);
+    });
+
+    return { regionStats, maxDuration, maxCount, totalDuration, totalCount };
+  }, [processedData, activity, showInstances]);
 
   const renderHeatmap = React.useCallback((ctx: CanvasRenderingContext2D) => {
     const { regionStats, maxDuration, maxCount } = calculateHeatData();
@@ -219,7 +235,7 @@ const SingleHeatmap: React.FC<SingleHeatmapProps> = React.memo(({
           regions={tooltipRegions}
           containerRef={containerRef}
           showInstances={showInstances}
-          data={data}
+          data={processedData}
         />
       </BaseWarehouseCanvas>
     </div>
@@ -241,6 +257,14 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
     'Handle down'
   ]);
   const [showInstances, setShowInstances] = React.useState<boolean>(false);
+  const [useCombinedRegions, setUseCombinedRegions] = React.useState<boolean>(false);
+
+  const dialogContentStyles = {
+    maxWidth: '90vw',
+    width: '1400px',
+    height: '90vh',
+    padding: '1.5rem',
+  };
 
   const filteredData = React.useMemo(() => 
     data.filter(record => selectedDates.has(record.date)),
@@ -259,17 +283,44 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
 
   if (!processMetadata || !layoutImage) return null;
 
+  const allRegions = processMetadata.layout.regions.map(r => r.name);
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>{t('heatmap.title')}</CardTitle>
-          <div className="flex items-center gap-2">
-            <span className="text-sm">{t('heatmap.showInstances')}</span>
-            <Switch
-              checked={showInstances}
-              onCheckedChange={setShowInstances}
-            />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{t('heatmap.showInstances')}</span>
+              <Switch
+                checked={showInstances}
+                onCheckedChange={setShowInstances}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{t('heatmap.useCombinedRegions')}</span>
+              <Switch
+                checked={useCombinedRegions}
+                onCheckedChange={setUseCombinedRegions}
+              />
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  {t('heatmap.manageRegions')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent style={dialogContentStyles} className="flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>{t('regionManagement.title')}</DialogTitle>
+                </DialogHeader>
+                <div className="flex-1 overflow-hidden mt-4">
+                  <RegionManagement regions={allRegions} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </CardHeader>
@@ -291,6 +342,7 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
                 });
               }}
               showInstances={showInstances}
+              useCombinedRegions={useCombinedRegions}
             />
           ))}
         </div>

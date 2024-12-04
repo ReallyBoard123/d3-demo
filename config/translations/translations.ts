@@ -143,6 +143,8 @@ export const translations = {
     heatmap: {
       title: 'Activity Heat Maps',
       showInstances: 'Show Instances',
+      useCombinedRegions: 'Use Combined Regions',
+      manageRegions: 'Manage Regions',
       colorIntensityInfo: 'Color intensity indicates relative {{type}} of activities in each region.',
       instancesNote: 'Only instances longer than 5 seconds are counted.',
       darkerColors: 'Darker colors represent higher values.',
@@ -178,6 +180,33 @@ export const translations = {
       },
       heatmap: {
         activityIntensity: 'Activity Intensity',
+      }
+    },
+    regionManagement: {
+      title: 'Region Management',
+      tabs: {
+        regions: 'Active Regions',
+        combinations: 'Saved Combinations',
+        excluded: 'Excluded Regions'
+      },
+      combine: {
+        namePlaceholder: 'Name for combined region',
+        buttonCombine: 'Combine',
+        buttonUpdate: 'Update',
+        count: '({{count}})'
+      },
+      regions: {
+        notAvailable: 'No regions available',
+        alreadyCombined: 'Already part of combination'
+      },
+      combinations: {
+        notFound: 'No combinations found',
+        deleteConfirm: 'Are you sure you want to delete this combination?',
+        deleteWarning: 'This will separate the combined regions and cannot be undone.'
+      },
+      excluded: {
+        title: 'Excluded Regions',
+        tooltip: 'Click to toggle region visibility'
       }
     },
   },
@@ -323,9 +352,38 @@ export const translations = {
       employee: 'Mitarbeiter {{id}}',
       noActivities: 'Keine Aktivitäten zu diesem Zeitpunkt',
     },
+    regionManagement: {
+      title: 'Regionsverwaltung',
+      tabs: {
+        regions: 'Aktive Regionen',
+        combinations: 'Gespeicherte Kombinationen',
+        excluded: 'Ausgeschlossene Regionen'
+      },
+      combine: {
+        namePlaceholder: 'Name für kombinierte Region',
+        buttonCombine: 'Kombinieren',
+        buttonUpdate: 'Aktualisieren',
+        count: '({{count}})'
+      },
+      regions: {
+        notAvailable: 'Keine Regionen verfügbar',
+        alreadyCombined: 'Bereits Teil einer Kombination'
+      },
+      combinations: {
+        notFound: 'Keine Kombinationen gefunden',
+        deleteConfirm: 'Möchten Sie diese Kombination wirklich löschen?',
+        deleteWarning: 'Dies trennt die kombinierten Regionen und kann nicht rückgängig gemacht werden.'
+      },
+      excluded: {
+        title: 'Ausgeschlossene Regionen',
+        tooltip: 'Klicken Sie, um die Regionssichtbarkeit umzuschalten'
+      }
+    },
     heatmap: {
       title: 'Aktivitäts-Heatmaps',
       showInstances: 'Instanzen anzeigen',
+      useCombinedRegions: 'Kombinierte Regionen verwenden',
+      manageRegions: 'Regionen verwalten',
       colorIntensityInfo: 'Farbintensität zeigt relative {{type}} der Aktivitäten in jeder Region.',
       instancesNote: 'Nur Instanzen länger als 5 Sekunden werden gezählt.',
       darkerColors: 'Dunklere Farben stellen höhere Werte dar.',

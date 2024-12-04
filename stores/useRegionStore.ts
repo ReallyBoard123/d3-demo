@@ -8,13 +8,14 @@ export interface RegionCombination {
 
 interface RegionState {
   combinations: RegionCombination[];
+  excludedRegions: Set<string>;
   addCombination: (name: string, regions: string[]) => void;
   removeCombination: (name: string) => void;
   updateCombination: (oldName: string, newName: string, regions: string[]) => void;
+  toggleExclusion: (region: string) => void;
+  clearExclusions: () => void;
   getCombinedRegion: (region: string) => string;
 }
-
-type RegionStore = RegionState;
 
 const validateCombination = (
   name: string, 
@@ -22,30 +23,26 @@ const validateCombination = (
   currentCombinations: RegionCombination[],
   oldName?: string
 ): boolean => {
-  // Check if name is not empty and has at least 2 regions
   if (!name.trim() || regions.length < 2) return false;
-
-  // When updating, allow the same name if it's the one being edited
   if (oldName && name === oldName) return true;
-
-  // Check if name is unique
+  
   const nameExists = currentCombinations.some(c => c.name === name);
   if (nameExists) return false;
 
-  // Check if any of the regions are already part of another combination
   const existingRegions = new Set(
     currentCombinations
-      .filter(c => c.name !== oldName) // Exclude the combination being edited
+      .filter(c => c.name !== oldName)
       .flatMap(c => c.regions)
   );
 
   return !regions.some(r => existingRegions.has(r));
 };
 
-export const useRegionStore = create<RegionStore>()(
+export const useRegionStore = create<RegionState>()(
   persist(
     (set, get) => ({
       combinations: [],
+      excludedRegions: new Set<string>(),
       
       addCombination: (name: string, regions: string[]) => {
         const currentCombinations = get().combinations;
@@ -80,6 +77,22 @@ export const useRegionStore = create<RegionStore>()(
           )
         }));
       },
+
+      toggleExclusion: (region: string) => {
+        set((state) => {
+          const newExcluded = new Set(state.excludedRegions);
+          if (newExcluded.has(region)) {
+            newExcluded.delete(region);
+          } else {
+            newExcluded.add(region);
+          }
+          return { excludedRegions: newExcluded };
+        });
+      },
+
+      clearExclusions: () => {
+        set({ excludedRegions: new Set() });
+      },
       
       getCombinedRegion: (region: string) => {
         const { combinations } = get();
@@ -88,27 +101,43 @@ export const useRegionStore = create<RegionStore>()(
       }
     }),
     {
-      name: 'region-combinations',
+      name: 'region-store',
       version: 1,
-      
-      // Optional: Add migration strategies if the store structure changes
-      migrate: (persistedState: any, version: number) => {
-        if (version === 0) {
-          // Handle migration from version 0 if needed
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          const data = JSON.parse(str);
           return {
-            ...persistedState,
-            combinations: persistedState.combinations || []
+            ...data,
+            state: {
+              ...data.state,
+              excludedRegions: new Set(data.state.excludedRegions)
+            }
           };
-        }
-        return persistedState as RegionStore;
+        },
+        setItem: (name, value) => {
+          const data = {
+            ...value,
+            state: {
+              ...value.state,
+              excludedRegions: Array.from(value.state.excludedRegions)
+            }
+          };
+          localStorage.setItem(name, JSON.stringify(data));
+        },
+        removeItem: (name) => localStorage.removeItem(name)
       }
     }
   )
 );
 
-// Helper hook for getting typed selections from the store
 export const useCombinations = () => {
   return useRegionStore(state => state.combinations);
+};
+
+export const useExcludedRegions = () => {
+  return useRegionStore(state => state.excludedRegions);
 };
 
 export const useRegionCombination = (name: string): RegionCombination | undefined => {
@@ -117,7 +146,6 @@ export const useRegionCombination = (name: string): RegionCombination | undefine
   );
 };
 
-// Type guard for checking if a value is a RegionCombination
 export const isRegionCombination = (value: unknown): value is RegionCombination => {
   return (
     typeof value === 'object' &&
