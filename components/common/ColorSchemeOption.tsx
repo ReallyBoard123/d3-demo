@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import type { ColorPalette } from '@/config/color';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ColorSchemeOptionProps {
   name: string;
@@ -23,6 +24,8 @@ export const ColorSchemeOption: React.FC<ColorSchemeOptionProps> = ({
   onEdit,
   onDelete
 }) => {
+  const { t } = useTranslation();
+
   const renderColorStrip = (colors: string[]) => (
     <div className="flex gap-0.5 rounded-sm overflow-hidden">
       {colors.slice(0, 4).map((color, i) => (
@@ -67,7 +70,7 @@ export const ColorSchemeOption: React.FC<ColorSchemeOptionProps> = ({
               e.stopPropagation();
               onEdit();
             }}
-            title="Edit theme"
+            title={t('settings.colors.buttons.editTheme')}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -81,7 +84,7 @@ export const ColorSchemeOption: React.FC<ColorSchemeOptionProps> = ({
               e.stopPropagation();
               onDelete();
             }}
-            title="Delete theme"
+            title={t('settings.colors.buttons.deleteTheme')}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateSelection } from '@/components/DateSelection';
 import ColorSettingsTab from './common/ColorSettingsTab';
 import { ChartId, SettingsSidebarProps } from '@/types';
-
+import { useTranslation } from '@/hooks/useTranslation';
 
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   metadata,
@@ -17,6 +17,8 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   onFilterChange,
   availableCharts,
 }) => {
+  const { t } = useTranslation();
+
   const toggleActivity = (activity: string) => {
     const newHiddenActivities = new Set(filterSettings.hiddenActivities);
     if (newHiddenActivities.has(activity)) {
@@ -43,20 +45,18 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     });
   };
 
-  // Get all available dates from the metadata date range
   const availableDates = React.useMemo(() => {
     const dates: string[] = [];
     const start = new Date(metadata.dateRange.start);
     const end = new Date(metadata.dateRange.end);
     
     for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
-      dates.push(date.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+      dates.push(date.toISOString().split('T')[0]);
     }
     
     return dates.sort();
   }, [metadata.dateRange]);
 
-  // Handler for date selection from DateSelection component
   const handleDateToggle = (date: string, isComparison: boolean) => {
     const targetSet = isComparison ? 'comparisonDates' : 'selectedDates';
     const newDates = new Set(filterSettings[targetSet]);
@@ -82,20 +82,20 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       </SheetTrigger>
       <SheetContent className="w-[400px]">
         <SheetHeader>
-          <SheetTitle>Dashboard Settings</SheetTitle>
+          <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
         
         <Tabs defaultValue="activities" className="w-full mt-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="activities">Activities</TabsTrigger>
-            <TabsTrigger value="dates">Dates</TabsTrigger>
-            <TabsTrigger value="charts">Charts</TabsTrigger>
-            <TabsTrigger value="colors">Colors</TabsTrigger>
+            <TabsTrigger value="activities">{t('settings.tabs.activities')}</TabsTrigger>
+            <TabsTrigger value="dates">{t('settings.tabs.dates')}</TabsTrigger>
+            <TabsTrigger value="charts">{t('settings.tabs.charts')}</TabsTrigger>
+            <TabsTrigger value="colors">{t('settings.tabs.colors')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="activities">
             <div className="py-4">
-              <h3 className="mb-2 text-sm font-medium">Visible Activities</h3>
+              <h3 className="mb-2 text-sm font-medium">{t('settings.activities.visibleActivities')}</h3>
               <ScrollArea className="h-[300px] pr-4">
                 <div className="space-y-2">
                   {metadata.uniqueActivities.map((activity) => (
@@ -115,9 +115,9 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
           <TabsContent value="dates">
             <div className="py-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium">Date Selection</h3>
+                <h3 className="text-sm font-medium">{t('settings.dates.dateSelection')}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">Compare Mode</span>
+                  <span className="text-sm">{t('settings.dates.compareMode')}</span>
                   <Switch
                     checked={filterSettings.isComparisonEnabled}
                     onCheckedChange={(checked) => 
@@ -144,8 +144,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
               {filterSettings.isComparisonEnabled && (
                 <div className="mt-4">
                   <p className="text-xs text-muted-foreground">
-                    Select dates to compare using the second switch for each date.
-                    Charts will display data from both selected and comparison dates.
+                    {t('settings.dates.compareModeHelp')}
                   </p>
                 </div>
               )}
@@ -154,7 +153,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
 
           <TabsContent value="charts">
             <div className="py-4">
-              <h3 className="mb-2 text-sm font-medium">Visible Charts</h3>
+              <h3 className="mb-2 text-sm font-medium">{t('settings.charts.visibleCharts')}</h3>
               <ScrollArea className="h-[300px] pr-4">
                 <div className="space-y-2">
                   {availableCharts.map((chart) => (
@@ -169,7 +168,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                 </div>
               </ScrollArea>
               <p className="text-xs text-muted-foreground mt-4">
-                Toggle charts to customize your dashboard view
+                {t('settings.charts.customizeHelp')}
               </p>
             </div>
           </TabsContent>

@@ -28,14 +28,74 @@ export const translations = {
     },
     settings: {
       title: 'Dashboard Settings',
-      activities: 'Activities',
-      dates: 'Dates',
-      charts: 'Charts',
-      colors: 'Colors',
-      visibleActivities: 'Visible Activities',
-      dateSelection: 'Date Selection',
-      compareMode: 'Compare Mode',
-      visibleCharts: 'Visible Charts'
+      tabs: {
+        activities: 'Activities', 
+        dates: 'Dates', 
+        charts: 'Charts',
+        colors: 'Colors', 
+      },
+      activities: {
+        visibleActivities: 'Visible Activities', 
+      },
+      dates: {
+        dateSelection: 'Date Selection',
+        compareMode: 'Compare Mode', 
+        compareModeHelp: 'Select dates to compare using the second switch for each date. Charts will display data from both selected and comparison dates.',
+      },
+      charts: {
+        visibleCharts: 'Visible Charts',
+        customizeHelp: 'Toggle charts to customize your dashboard view' 
+      },
+      colors: {
+        presetThemes: 'Preset Themes', 
+        customThemes: 'Custom Themes',
+        createNew: 'Create New', 
+        errors: {
+          presetNameModified: 'Please provide a new name when saving modified preset theme', 
+          nameConflict: 'Cannot use a preset theme name. Please choose a different name.' 
+        },
+        buttons: {
+          editTheme: 'Edit theme', 
+          deleteTheme: 'Delete theme', 
+        }
+      },
+      colorGenerator: {
+        baseHue: 'Base Hue', 
+        saturation: 'Saturation', 
+        lightness: 'Lightness', 
+        generateGradient: 'Generate Gradient',
+        useGradientGenerator: 'Use Gradient Generator',
+        primaryColors: 'Primary Colors',
+        comparisonColors: 'Comparison Colors', 
+        themeName: 'Theme name',
+        actions: {
+          save: 'Save', 
+          update: 'Update',
+          cancel: 'Cancel',
+        },
+        colorLabels: {
+          primary: 'Primary Color {{number}}', 
+          comparison: 'Comparison Color {{number}}' 
+        }
+      },
+      dateSelection: {
+        title: 'Date Selection',
+        missingEmployees: 'Missing data from: {{employees}}',
+        missingCount: 'Missing {{count}} employees',
+        expected: 'Expected: {{count}}',
+        present: 'Present: {{count}}',
+        weekLabel: 'Week of {{date}}',
+        tooltip: {
+          employees: 'Employees: {{current}}/{{expected}}',
+          totalHours: 'Total Hours: {{hours}}h',
+          missingData: 'Missing data for {{count}} employee(s)'
+        },
+        select: {
+          placeholder: 'Select dates...',
+          selected: 'Selected'
+        },
+        compareHint: 'Select two dates to compare their activities',
+      }
     },
     common: {
       settings: 'Settings',
@@ -150,14 +210,75 @@ export const translations = {
     },
     settings: {
       title: 'Dashboard-Einstellungen',
-      activities: 'Aktivitäten',
-      dates: 'Daten',
-      charts: 'Diagramme',
-      colors: 'Farben',
-      visibleActivities: 'Sichtbare Aktivitäten',
-      dateSelection: 'Datumsauswahl',
-      compareMode: 'Vergleichsmodus',
-      visibleCharts: 'Sichtbare Diagramme'
+      tabs: {
+        activities: 'Aktivitäten',
+        dates: 'Daten',
+        charts: 'Diagramme',
+        colors: 'Farben',
+      },
+      activities: {
+        visibleActivities: 'Sichtbare Aktivitäten',
+      },
+      dates: {
+        dateSelection: 'Datumsauswahl',
+        compareMode: 'Vergleichmodus',
+        compareModeHelp: 'Wählen Sie Daten zum Vergleichen mit dem zweiten Schalter für jedes Datum. Diagramme zeigen Daten von beiden ausgewählten und Vergleichsdaten an.',
+      },
+      charts: {
+        visibleCharts: 'Sichtbare Diagramme',
+        customizeHelp: 'Schalten Sie Diagramme um, um Ihre Dashboard-Ansicht anzupassen'
+      },
+      colors: {
+        presetThemes: 'Voreingestellte Themen',
+        customThemes: 'Benutzerdefinierte Themen',
+        createNew: 'Neu erstellen',
+        errors: {
+          presetNameModified: 'Bitte geben Sie einen neuen Namen an, wenn Sie ein voreingestelltes Thema ändern',
+          nameConflict: 'Der Name eines voreingestellten Themas kann nicht verwendet werden. Bitte wählen Sie einen anderen Namen.',
+        },
+        buttons: {
+          editTheme: 'Theme bearbeiten',
+          deleteTheme: 'Theme löschen'
+        }
+      },
+      colorGenerator: {
+        baseHue: 'Basis-Farbton',
+        saturation: 'Sättigung',
+        lightness: 'Helligkeit',
+        generateGradient: 'Farbverlauf generieren',
+        useGradientGenerator: 'Farbverlaufgenerator verwenden',
+        primaryColors: 'Primärfarben',
+        comparisonColors: 'Vergleichsfarben',
+        themeName: 'Theme-Name',
+        actions: {
+          save: 'Speichern',
+          update: 'Aktualisieren',
+          cancel: 'Abbrechen',
+        },
+        colorLabels: {
+          primary: 'Primärfarbe {{number}}',
+          comparison: 'Vergleichsfarbe {{number}}',
+        }
+      },
+      dateSelection: {
+        title: 'Datumsauswahl',
+        missingEmployees: 'Fehlende Daten von: {{employees}}',
+        missingCount: '{{count}} Mitarbeiter fehlen',
+        expected: 'Erwartet: {{count}}',
+        present: 'Anwesend: {{count}}',
+        weekLabel: 'Woche vom {{date}}',
+        tooltip: {
+          employees: 'Mitarbeiter: {{current}}/{{expected}}',
+          totalHours: 'Gesamtstunden: {{hours}}h',
+          missingData: 'Fehlende Daten für {{count}} Mitarbeiter'
+        },
+        select: {
+          placeholder: 'Daten auswählen...',
+          selected: 'Ausgewählt'
+        },
+        compareHint: 'Wählen Sie zwei Daten aus, um ihre Aktivitäten zu vergleichen',
+      }
+
     },
     common: {
       settings: 'Einstellungen',

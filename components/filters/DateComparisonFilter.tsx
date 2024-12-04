@@ -26,6 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { GitCompareIcon, X, AlertTriangle } from "lucide-react";
 import { format, parse, isValid } from "date-fns";
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DateMetrics {
   employeeCount: number;
@@ -58,35 +59,37 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
   onComparisonModeChange,
   expectedEmployeeCount,
   dateMetrics
-}) => {
-  // Group dates by week and filter out dates with no data
+ }) => {
+  const { t } = useTranslation();
+ 
   const groupedDates = React.useMemo(() => {
     const groups: GroupedDates = {};
     
     dates.forEach(date => {
       const metrics = dateMetrics[date];
-      
-      // Skip dates with no data
       if (!metrics || metrics.totalDuration === 0) return;
-
+ 
       const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
       if (!isValid(parsedDate)) return;
-
-      const weekKey = format(parsedDate, "'Week of' MMM d");
+ 
+      const weekKey = format(parsedDate, t('settings.dateSelection.weekLabel', {
+        date: format(parsedDate, 'MMM d')
+      }));
+      
       if (!groups[weekKey]) {
         groups[weekKey] = [];
       }
-
+ 
       groups[weekKey].push({
         date,
         metrics,
         hasIncompleteData: metrics.employeeCount < expectedEmployeeCount
       });
     });
-
+ 
     return groups;
-  }, [dates, dateMetrics, expectedEmployeeCount]);
-
+  }, [dates, dateMetrics, expectedEmployeeCount, t]);
+ 
   const handleDateToggle = (date: string) => {
     if (comparisonMode && selectedDates.length >= 2 && !selectedDates.includes(date)) {
       return;
@@ -98,17 +101,19 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
     
     onDateSelection(newDates);
   };
-
+ 
   const formatDisplayDate = (date: string) => {
     const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
     return format(parsedDate, 'EEE, MMM d');
   };
-
+ 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-base font-medium">Date Selection</CardTitle>
+          <CardTitle className="text-base font-medium">
+            {t('settings.dateSelection.title')}
+          </CardTitle>
           <Button
             variant={comparisonMode ? "default" : "outline"}
             size="sm"
@@ -116,12 +121,11 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
             className="h-8"
           >
             <GitCompareIcon className="h-4 w-4 mr-2" />
-            Compare
+            {t('dashboard.compare')}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Selected Dates Display */}
         <div className="flex flex-wrap gap-2 mb-3">
           {selectedDates.map(date => (
             <Badge 
@@ -137,11 +141,10 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
             </Badge>
           ))}
         </div>
-
-        {/* Date Selection Dropdown */}
+ 
         <Select>
           <SelectTrigger>
-            <SelectValue placeholder="Select dates..." />
+            <SelectValue placeholder={t('settings.dateSelection.select.placeholder')} />
           </SelectTrigger>
           <SelectContent>
             <ScrollArea className="h-80">
@@ -171,7 +174,7 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
                                 )}
                                 {selectedDates.includes(date) && (
                                   <Badge variant="outline" className="ml-2">
-                                    Selected
+                                    {t('settings.dateSelection.select.selected')}
                                   </Badge>
                                 )}
                               </div>
@@ -180,11 +183,18 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className="space-y-1 text-sm">
-                            <p>Employees: {metrics.employeeCount}/{expectedEmployeeCount}</p>
-                            <p>Total Hours: {(metrics.totalDuration / 3600).toFixed(1)}h</p>
+                            <p>{t('settings.dateSelection.tooltip.employees', {
+                              current: metrics.employeeCount,
+                              expected: expectedEmployeeCount
+                            })}</p>
+                            <p>{t('settings.dateSelection.tooltip.totalHours', {
+                              hours: (metrics.totalDuration / 3600).toFixed(1)
+                            })}</p>
                             {hasIncompleteData && (
                               <p className="text-red-500">
-                                Missing data for {expectedEmployeeCount - metrics.employeeCount} employee(s)
+                                {t('settings.dateSelection.tooltip.missingData', {
+                                  count: expectedEmployeeCount - metrics.employeeCount
+                                })}
                               </p>
                             )}
                           </div>
@@ -197,15 +207,15 @@ const DateComparisonFilter: React.FC<DateComparisonFilterProps> = ({
             </ScrollArea>
           </SelectContent>
         </Select>
-
+ 
         {comparisonMode && (
           <p className="text-xs text-muted-foreground mt-2">
-            Select two dates to compare their activities
+            {t('settings.dateSelection.compareHint')}
           </p>
         )}
       </CardContent>
     </Card>
   );
-};
-
-export default DateComparisonFilter;
+ };
+ 
+ export default DateComparisonFilter;

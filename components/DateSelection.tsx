@@ -1,19 +1,15 @@
 import React from 'react';
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DateMetrics {
   employeeCount: number;
   totalDuration: number;
-  missingEmployees: string[]; // Add this to track missing employees
+  missingEmployees: string[];
 }
 
 interface DateSelectionProps {
@@ -35,6 +31,7 @@ export const DateSelection: React.FC<DateSelectionProps> = ({
   expectedEmployeeCount,
   onDateToggle,
 }) => {
+  const { t } = useTranslation();
   const formatDate = (date: string) => format(new Date(date), 'MMM dd, yyyy');
 
   const hasIncompleteData = (date: string) => {
@@ -45,7 +42,9 @@ export const DateSelection: React.FC<DateSelectionProps> = ({
   const getMissingEmployeesText = (date: string) => {
     const metrics = dateMetrics[date];
     if (!metrics?.missingEmployees?.length) return null;
-    return `Missing data from: ${metrics.missingEmployees.join(', ')}`;
+    return t('settings.dateSelection.missingEmployees', { 
+      employees: metrics.missingEmployees.join(', ') 
+    });
   };
 
   return (
@@ -69,9 +68,15 @@ export const DateSelection: React.FC<DateSelectionProps> = ({
                         <AlertCircle className="h-4 w-4 text-red-500" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{missingText || `Missing ${expectedEmployeeCount - metrics.employeeCount} employees`}</p>
-                        <p className="text-xs mt-1">Expected: {expectedEmployeeCount}</p>
-                        <p className="text-xs">Present: {metrics.employeeCount}</p>
+                        <p>{missingText || t('settings.dateSelection.missingCount', { 
+                          count: expectedEmployeeCount - metrics.employeeCount 
+                        })}</p>
+                        <p className="text-xs mt-1">{t('settings.dateSelection.expected', { 
+                          count: expectedEmployeeCount 
+                        })}</p>
+                        <p className="text-xs">{t('settings.dateSelection.present', { 
+                          count: metrics.employeeCount 
+                        })}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>

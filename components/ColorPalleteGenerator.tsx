@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Wand2, Save, X } from "lucide-react";
 import type { ColorPalette } from '@/config/color';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ColorPaletteGeneratorProps {
   onSave: (name: string, palette: ColorPalette) => void;
@@ -14,8 +15,9 @@ interface ColorPaletteGeneratorProps {
   initialPalette?: ColorPalette;
   initialName?: string;
   isEditing?: boolean;
-  isPresetEdit?: boolean; // New prop
+  isPresetEdit?: boolean;
 }
+
 interface ColorPickerProps {
   color: string;
   onChange: (color: string) => void;
@@ -44,6 +46,7 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
   initialName = '',
   isEditing = false,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = React.useState(initialName);
   const [useGradient, setUseGradient] = React.useState(false);
   const [hue, setHue] = React.useState(210);
@@ -108,7 +111,7 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
       {useGradient && (
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Base Hue</label>
+            <label className="text-sm font-medium">{t('settings.colorGenerator.baseHue')}</label>
             <Slider
               value={[hue]}
               min={0}
@@ -120,7 +123,7 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
           </div>
           
           <div>
-            <label className="text-sm font-medium">Saturation</label>
+            <label className="text-sm font-medium">{t('settings.colorGenerator.saturation')}</label>
             <Slider
               value={[saturation]}
               min={0}
@@ -132,7 +135,7 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
           </div>
           
           <div>
-            <label className="text-sm font-medium">Lightness</label>
+            <label className="text-sm font-medium">{t('settings.colorGenerator.lightness')}</label>
             <Slider
               value={[lightness]}
               min={20}
@@ -145,14 +148,14 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
 
           <Button onClick={generateGradient} className="w-full">
             <Wand2 className="mr-2 h-4 w-4" />
-            Generate Gradient
+            {t('settings.colorGenerator.generateGradient')}
           </Button>
         </div>
       )}
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Use Gradient Generator</span>
+          <span className="text-sm font-medium">{t('settings.colorGenerator.useGradientGenerator')}</span>
           <Switch
             checked={useGradient}
             onCheckedChange={setUseGradient}
@@ -160,28 +163,28 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Primary Colors</label>
+          <label className="text-sm font-medium">{t('settings.colorGenerator.primaryColors')}</label>
           <div className="grid grid-cols-6 gap-2">
             {primaryColors.map((color, i) => (
               <ColorPickerButton
                 key={i}
                 color={color}
                 onChange={(newColor) => updatePrimaryColor(i, newColor)}
-                label={`Primary Color ${i + 1}`}
+                label={t('settings.colorGenerator.colorLabels.primary', { number: i + 1 })}
               />
             ))}
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Comparison Colors</label>
+          <label className="text-sm font-medium">{t('settings.colorGenerator.comparisonColors')}</label>
           <div className="grid grid-cols-6 gap-2">
             {comparisonColors.map((color, i) => (
               <ColorPickerButton
                 key={i}
                 color={color}
                 onChange={(newColor) => updateComparisonColor(i, newColor)}
-                label={`Comparison Color ${i + 1}`}
+                label={t('settings.colorGenerator.colorLabels.comparison', { number: i + 1 })}
               />
             ))}
           </div>
@@ -192,16 +195,16 @@ export const ColorPaletteGenerator: React.FC<ColorPaletteGeneratorProps> = ({
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Theme name"
+          placeholder={t('settings.colorGenerator.themeName')}
           disabled={isEditing}
         />
         <Button onClick={handleSave} disabled={!name.trim()}>
           <Save className="mr-2 h-4 w-4" />
-          {isEditing ? 'Update' : 'Save'}
+          {isEditing ? t('settings.colorGenerator.actions.update') : t('settings.colorGenerator.actions.save')}
         </Button>
         <Button variant="outline" onClick={onCancel}>
           <X className="mr-2 h-4 w-4" />
-          Cancel
+          {t('settings.colorGenerator.actions.cancel')}
         </Button>
       </div>
     </div>

@@ -8,10 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ColorPaletteGenerator } from '../ColorPalleteGenerator';
 import { ColorSchemeOption } from './ColorSchemeOption';
-import { 
-  COLOR_SCHEMES,
-  type ColorPalette,
-} from '@/config/color';
+import { COLOR_SCHEMES, type ColorPalette } from '@/config/color';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface EditingState {
   originalName: string;
@@ -20,6 +18,7 @@ interface EditingState {
 }
 
 const ColorSettingsTab: React.FC = () => {
+  const { t } = useTranslation();
   const { 
     globalScheme,   
     setGlobalScheme, 
@@ -33,22 +32,20 @@ const ColorSettingsTab: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSave = (name: string, palette: ColorPalette) => {
-    // If we're editing a preset, force a new name
     if (editingState?.isPreset && name === editingState.originalName) {
-      setError("Please provide a new name when saving modified preset theme");
+      setError(t('settings.colors.errors.presetNameModified'));
       return;
     }
 
-    // Check for name conflicts with presets
     if (COLOR_SCHEMES.some(scheme => scheme.name === name) && 
         (!editingState || editingState.originalName !== name)) {
-      setError("Cannot use a preset theme name. Please choose a different name.");
+      setError(t('settings.colors.errors.nameConflict'));
       return;
     }
 
     if (name.trim()) {
       saveCustomPalette(name, palette);
-      setGlobalScheme(name); // Automatically switch to the new/edited theme
+      setGlobalScheme(name);
       setShowGenerator(false);
       setEditingState(null);
       setError(null);
@@ -56,7 +53,6 @@ const ColorSettingsTab: React.FC = () => {
   };
 
   const handleEdit = (name: string) => {
-    // Find the palette in either presets or custom palettes
     const presetScheme = COLOR_SCHEMES.find(scheme => scheme.name === name);
     const isPreset = !!presetScheme;
     
@@ -109,7 +105,7 @@ const ColorSettingsTab: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium">Preset Themes</h3>
+              <h3 className="text-sm font-medium">{t('settings.colors.presetThemes')}</h3>
             </div>
             <div className="space-y-4">
               {COLOR_SCHEMES.map((scheme) => (
@@ -129,7 +125,7 @@ const ColorSettingsTab: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium">Custom Themes</h3>
+              <h3 className="text-sm font-medium">{t('settings.colors.customThemes')}</h3>
               {!showGenerator && (
                 <Button
                   variant="outline"
@@ -137,7 +133,7 @@ const ColorSettingsTab: React.FC = () => {
                   onClick={handleCreate}
                 >
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  Create New
+                  {t('settings.colors.createNew')}
                 </Button>
               )}
             </div>
