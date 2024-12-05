@@ -4,31 +4,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import type { 
-  ProcessMetadata, 
   CanvasSize,
   CanvasState,
-  CanvasInteractionConfig
+  CanvasInteractionConfig,
+  RegionDefinition
 } from '@/types';
 import { CANVAS_CONSTANTS } from '@/types/constants';
-
-export interface RegionDimensions {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface TextRenderInfo {
-  text: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import { useRegionStore } from '@/stores/useRegionStore';
+import { 
+  updateMetadataWithCombinedRegions, 
+  type ExtendedProcessMetadata,
+  type RegionDimensions
+} from '@/lib/RegionCalculations';
 
 export interface BaseWarehouseCanvasProps {
   layoutImage: File;
-  metadata: ProcessMetadata;
+  metadata: ExtendedProcessMetadata;
   className?: string;
   config?: CanvasInteractionConfig;
   onCanvasReady?: (context: CanvasRenderingContext2D) => void;
@@ -39,18 +30,31 @@ export interface BaseWarehouseCanvasProps {
   renderMode?: 'static' | 'dynamic';
 }
 
-export const calculateTextLayout = (width: number, height: number): 'vertical' | 'horizontal' | 'square' => {
+export function calculateRegionDimensions(
+  region: RegionDefinition,
+  canvasWidth: number,
+  canvasHeight: number
+): RegionDimensions {
+  return {
+    x: region.position_top_left_x * canvasWidth,
+    y: region.position_top_left_y * canvasHeight,
+    width: (region.position_bottom_right_x - region.position_top_left_x) * canvasWidth,
+    height: (region.position_bottom_right_y - region.position_top_left_y) * canvasHeight
+  };
+}
+
+export function calculateTextLayout(width: number, height: number): 'vertical' | 'horizontal' | 'square' {
   const aspectRatio = width / height;
   if (aspectRatio < 0.8) return 'vertical';
   if (aspectRatio > 1.2) return 'horizontal';
   return 'square';
-};
+}
 
-export const renderRegionText = (
+export function renderRegionText(
   ctx: CanvasRenderingContext2D,
   text: string,
   dimensions: RegionDimensions
-): void => {
+): void {
   const layout = calculateTextLayout(dimensions.width, dimensions.height);
   const longestDimension = Math.max(dimensions.width, dimensions.height);
   const baseFontSize = Math.min(
@@ -91,23 +95,7 @@ export const renderRegionText = (
   );
 
   ctx.restore();
-};
-
-export const calculateRegionDimensions = (
-  region: { 
-    position_top_left_x: number;
-    position_top_left_y: number;
-    position_bottom_right_x: number;
-    position_bottom_right_y: number;
-  },
-  canvasWidth: number,
-  canvasHeight: number
-): RegionDimensions => ({
-  x: region.position_top_left_x * canvasWidth,
-  y: region.position_top_left_y * canvasHeight,
-  width: (region.position_bottom_right_x - region.position_top_left_x) * canvasWidth,
-  height: (region.position_bottom_right_y - region.position_top_left_y) * canvasHeight
-});
+}
 
 const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
   layoutImage,
@@ -122,23 +110,28 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
   onRegionHover,
   onRegionClick,
   children,
-  renderMode = 'dynamic'
+  renderMode = 'dynamic',
 }) => {
+  const combinations = useRegionStore(state => state.combinations);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const imageRef = React.useRef<HTMLImageElement | null>(null);
   const [isImageLoaded, setIsImageLoaded] = React.useState(false);
   const [imageLoadAttempt, setImageLoadAttempt] = React.useState(0);
-  
+  const [processedMetadata, setProcessedMetadata] = React.useState<ExtendedProcessMetadata>(metadata);
   const [canvasSize, setCanvasSize] = React.useState<CanvasSize>({
     width: metadata.layout.width_pixel || CANVAS_CONSTANTS.DEFAULT_WIDTH,
     height: metadata.layout.height_pixel || CANVAS_CONSTANTS.DEFAULT_HEIGHT
   });
-
   const [state, setState] = React.useState<CanvasState>({
     isLoading: true,
     error: null,
     hoveredRegion: null
   });
+
+  React.useEffect(() => {
+    const updatedMetadata = updateMetadataWithCombinedRegions(metadata, combinations);
+    setProcessedMetadata(updatedMetadata);
+  }, [metadata, combinations]);
 
   const createImageUrl = React.useCallback(async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -167,15 +160,12 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
     }
   }, [isImageLoaded]);
 
-  const render = React.useCallback(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-
+  const renderContent = React.useCallback((ctx: CanvasRenderingContext2D) => {
     const baseDrawn = drawBaseImage(ctx);
-    if (baseDrawn) {
-      onRender?.(ctx);
-    }
+    if (!baseDrawn) return;
+
+    // Let onRender handle all the drawing
+    onRender?.(ctx);
   }, [drawBaseImage, onRender]);
 
   React.useEffect(() => {
@@ -244,12 +234,12 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
     if (!ctx) return;
 
     onCanvasReady?.(ctx);
-    render();
+    renderContent(ctx);
 
     let animationFrameId: number;
     if (renderMode === 'dynamic') {
       const animate = () => {
-        render();
+        renderContent(ctx);
         animationFrameId = requestAnimationFrame(animate);
       };
       animationFrameId = requestAnimationFrame(animate);
@@ -260,14 +250,14 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isImageLoaded, render, onCanvasReady, renderMode]);
+  }, [isImageLoaded, renderContent, onCanvasReady, renderMode]);
 
   const handleResize = React.useCallback(() => {
     const container = canvasRef.current?.parentElement;
     if (!container) return;
 
     const { width } = container.getBoundingClientRect();
-    const aspectRatio = metadata.layout.height_pixel / metadata.layout.width_pixel;
+    const aspectRatio = processedMetadata.layout.height_pixel / processedMetadata.layout.width_pixel;
     
     setCanvasSize(prev => {
       const next = {
@@ -276,7 +266,7 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
       };
       return prev.width !== next.width || prev.height !== next.height ? next : prev;
     });
-  }, [metadata.layout]);
+  }, [processedMetadata.layout]);
 
   React.useEffect(() => {
     handleResize();
@@ -293,9 +283,12 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
 
   React.useEffect(() => {
     if (renderMode === 'static' && isImageLoaded) {
-      render();
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) {
+        renderContent(ctx);
+      }
     }
-  }, [render, canvasSize, renderMode, isImageLoaded]);
+  }, [renderContent, canvasSize, renderMode, isImageLoaded]);
 
   const handleMouseMove = React.useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!config.enableHover || !onRegionHover) return;
@@ -308,7 +301,7 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
     const y = (event.clientY - rect.top) * (canvas.height / rect.height);
 
     let hoveredRegion: string | null = null;
-    metadata.layout.regions.forEach(region => {
+    processedMetadata.layout.regions.forEach(region => {
       const dimensions = calculateRegionDimensions(region, canvas.width, canvas.height);
       if (
         x >= dimensions.x && 
@@ -321,7 +314,7 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
     });
 
     onRegionHover(hoveredRegion);
-  }, [config.enableHover, onRegionHover, metadata.layout.regions]);
+  }, [config.enableHover, onRegionHover, processedMetadata.layout.regions]);
 
   const handleClick = React.useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!config.enableClick || !onRegionClick) return;
@@ -333,7 +326,7 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
     const x = (event.clientX - rect.left) * (canvas.width / rect.width);
     const y = (event.clientY - rect.top) * (canvas.height / rect.height);
 
-    metadata.layout.regions.forEach(region => {
+    processedMetadata.layout.regions.forEach(region => {
       const dimensions = calculateRegionDimensions(region, canvas.width, canvas.height);
       if (
         x >= dimensions.x && 
@@ -344,7 +337,7 @@ const BaseWarehouseCanvas: React.FC<BaseWarehouseCanvasProps> = ({
         onRegionClick(region.name);
       }
     });
-  }, [config.enableClick, onRegionClick, metadata.layout.regions]);
+  }, [config.enableClick, onRegionClick, processedMetadata.layout.regions]);
 
   if (state.error) {
     return (
