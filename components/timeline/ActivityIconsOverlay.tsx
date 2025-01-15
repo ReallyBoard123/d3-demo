@@ -142,8 +142,8 @@ export const ActivityIconsOverlay: React.FC<ActivityIconsOverlayProps> = ({ acti
               </TooltipTrigger>
               <TooltipContent>
                 <div className="text-sm">
-                  <p>{t('warehouseCanvas.tooltip.employee', { id: activity.employeeId })}</p>
-                  <p>{t('warehouseCanvas.tooltip.activity', { activity: translateActivity(activity.activity) })}</p>
+                  <p>{t('canvas.tooltip.employee', { id: activity.employeeId })}</p>
+                  <p>{t('canvas.tooltip.activity', { activity: translateActivity(activity.activity) })}</p>
                 </div>
               </TooltipContent>
             </Tooltip>
