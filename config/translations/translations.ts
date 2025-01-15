@@ -4,26 +4,26 @@ export const translations = {
       title: 'Activity Dashboard',
       totalTime: 'Total Time',
       avgActiveDuration: 'Avg Active Duration',
-      totalEmployees: 'Total Employees',
-      busiestRegion: 'Busiest Region',
+      totalEmployees: 'Total Users',
+      busiestRegion: 'Most Active Area',
       activityDistribution: 'Activity Distribution',
-      employeeActivity: 'Employee Activity',
+      employeeActivity: 'User Activity',
       peakActivityTimes: 'Peak Activity Times',
-      regionHeatmap: 'Region Heat Map',
+      regionHeatmap: 'Area Heat Map',
       activityTimeline: 'Activity Timeline',
       compare: 'Compare',
       selectDates: 'Select dates',
-      selectEmployee: 'Select employee',
-      allEmployees: 'All employees',
+      selectEmployee: 'Select user',
+      allEmployees: 'All users',
       loadingDashboard: 'Loading dashboard...',
       preparingAnalytics: 'Preparing analytics...',
       hoursAbbreviation: 'h',
       vsText: 'vs',
       tooltips: {
-        totalTime: 'Total hours across all activities and employees',
-        avgDuration: 'Average duration of activity for employee shifts',
-        totalEmployees: 'Total number of unique employees',
-        busiestRegion: 'Region with the most activity hours'
+        totalTime: 'Total hours across all activities and users',
+        avgDuration: 'Average duration of activity per user session',
+        totalEmployees: 'Total number of unique users',
+        busiestRegion: 'Area with the most activity hours'
       }
     },
     settings: {
@@ -32,69 +32,69 @@ export const translations = {
         activities: 'Activities', 
         dates: 'Dates', 
         charts: 'Charts',
-        colors: 'Colors', 
+        colors: 'Colors'
       },
       activities: {
-        visibleActivities: 'Visible Activities', 
+        visibleActivities: 'Visible Activities'
       },
       dates: {
         dateSelection: 'Date Selection',
-        compareMode: 'Compare Mode', 
-        compareModeHelp: 'Select dates to compare using the second switch for each date. Charts will display data from both selected and comparison dates.',
+        compareMode: 'Compare Mode',
+        compareModeHelp: 'Select dates to compare using the second switch for each date. Charts will display data from both selected and comparison dates'
       },
       charts: {
         visibleCharts: 'Visible Charts',
-        customizeHelp: 'Toggle charts to customize your dashboard view' 
+        customizeHelp: 'Toggle charts to customize your dashboard view'
       },
       colors: {
-        presetThemes: 'Preset Themes', 
+        presetThemes: 'Preset Themes',
         customThemes: 'Custom Themes',
-        createNew: 'Create New', 
+        createNew: 'Create New',
         errors: {
-          presetNameModified: 'Please provide a new name when saving modified preset theme', 
-          nameConflict: 'Cannot use a preset theme name. Please choose a different name.' 
+          presetNameModified: 'Please provide a new name when saving modified preset theme',
+          nameConflict: 'Cannot use a preset theme name. Please choose a different name.'
         },
         buttons: {
-          editTheme: 'Edit theme', 
-          deleteTheme: 'Delete theme', 
+          editTheme: 'Edit theme',
+          deleteTheme: 'Delete theme'
         }
       },
       colorGenerator: {
-        baseHue: 'Base Hue', 
-        saturation: 'Saturation', 
-        lightness: 'Lightness', 
+        baseHue: 'Base Hue',
+        saturation: 'Saturation',
+        lightness: 'Lightness',
         generateGradient: 'Generate Gradient',
         useGradientGenerator: 'Use Gradient Generator',
         primaryColors: 'Primary Colors',
-        comparisonColors: 'Comparison Colors', 
+        comparisonColors: 'Comparison Colors',
         themeName: 'Theme name',
         actions: {
-          save: 'Save', 
+          save: 'Save',
           update: 'Update',
-          cancel: 'Cancel',
+          cancel: 'Cancel'
         },
         colorLabels: {
-          primary: 'Primary Color {{number}}', 
-          comparison: 'Comparison Color {{number}}' 
+          primary: 'Primary Color {{number}}',
+          comparison: 'Comparison Color {{number}}'
         }
       },
       dateSelection: {
         title: 'Date Selection',
         missingEmployees: 'Missing data from: {{employees}}',
-        missingCount: 'Missing {{count}} employees',
+        missingCount: 'Missing {{count}} users',
         expected: 'Expected: {{count}}',
         present: 'Present: {{count}}',
         weekLabel: 'Week of {{date}}',
         tooltip: {
-          employees: 'Employees: {{current}}/{{expected}}',
+          employees: 'Users: {{current}}/{{expected}}',
           totalHours: 'Total Hours: {{hours}}h',
-          missingData: 'Missing data for {{count}} employee(s)'
+          missingData: 'Missing data for {{count}} user(s)'
         },
         select: {
           placeholder: 'Select dates...',
           selected: 'Selected'
         },
-        compareHint: 'Select two dates to compare their activities',
+        compareHint: 'Select two dates to compare their activities'
       }
     },
     common: {
@@ -108,20 +108,20 @@ export const translations = {
       error: 'Error',
       success: 'Success',
       comparison: {
-        vs: 'vs',
+        vs: 'vs'
       },
       chart: {
-        noLabel: 'No label',
-      },
+        noLabel: 'No label'
+      }
     },
     fileUploader: {
-      title: 'Upload Warehouse Activity Data',
+      title: 'Upload Activity Data',
       clearFiles: 'Clear Files',
       dropHere: 'Drop the files here...',
       dragAndDrop: 'Drag and drop files here, or click to select',
       layoutImage: 'Layout Image (PNG)',
       processMetadata: 'Process Metadata (JSON)',
-      warehouseActivity: 'Warehouse Activity (JSON)',
+      warehouseActivity: 'Activity Data (JSON)',
       processing: 'Processing files...',
       selectFiles: 'Select Files',
       uploadAllFiles: 'Please upload all required files before proceeding',
@@ -137,15 +137,15 @@ export const translations = {
       timelineSlider: 'Timeline position slider',
       noDataAvailable: 'No dates available for timeline visualization',
       selectDate: 'Select date',
-      employee: 'Employee {{id}}',
-      noActivities: 'No activities at this time',
+      employee: 'User {{id}}',
+      noActivities: 'No activities at this time'
     },
     heatmap: {
       title: 'Activity Heat Maps',
       showInstances: 'Show Instances',
-      useCombinedRegions: 'Use Combined Regions',
-      manageRegions: 'Manage Regions',
-      colorIntensityInfo: 'Color intensity indicates relative {{type}} of activities in each region.',
+      useCombinedRegions: 'Use Combined Areas',
+      manageRegions: 'Manage Areas',
+      colorIntensityInfo: 'Color intensity indicates relative {{type}} of activities in each area.',
       instancesNote: 'Only instances longer than 5 seconds are counted.',
       darkerColors: 'Darker colors represent higher values.',
       frequency: 'frequency',
@@ -153,88 +153,88 @@ export const translations = {
     },
     heatmapTooltip: {
       duration: 'Duration',
-      totalInstances: 'Total Instances', 
+      totalInstances: 'Total Instances',
       percentageTotal: '% of Total',
       seconds: 'sec',
       greaterThan: '>'
     },
     activityTooltip: {
-      value: 'Value',  
-      comparison: 'Comparison',  
+      value: 'Value',
+      comparison: 'Comparison',
       total: 'Total',
-      selected: 'Selected Period',        
+      selected: 'Selected Period'
     },
-    warehouseCanvas: {
+    canvas: {
       loadingError: 'Failed to load layout image',
       tooltip: {
         activity: 'Activity: {{activity}}',
-        employee: 'Employee: {{id}}',
-        region: 'Region: {{name}}'
+        employee: 'User: {{id}}',
+        region: 'Area: {{name}}'
       }
     },
     charts: {
       activityDistribution: {
-        title: 'Activity Distribution',   
-        hoursLabel: 'Hours',  
+        title: 'Activity Distribution',
+        hoursLabel: 'Hours',
         hours: 'h'
       },
       heatmap: {
-        activityIntensity: 'Activity Intensity',
+        activityIntensity: 'Activity Intensity'
       }
     },
     regionManagement: {
-      title: 'Region Management',
+      title: 'Area Management',
       tabs: {
-        regions: 'Active Regions',
+        regions: 'Active Areas',
         combinations: 'Saved Combinations',
-        excluded: 'Excluded Regions'
+        excluded: 'Excluded Areas'
       },
       combine: {
-        namePlaceholder: 'Name for combined region',
+        namePlaceholder: 'Name for combined area',
         buttonCombine: 'Combine',
         buttonUpdate: 'Update',
         count: '({{count}})'
       },
       regions: {
-        notAvailable: 'No regions available',
+        notAvailable: 'No areas available',
         alreadyCombined: 'Already part of combination'
       },
       combinations: {
         notFound: 'No combinations found',
         deleteConfirm: 'Are you sure you want to delete this combination?',
-        deleteWarning: 'This will separate the combined regions and cannot be undone.'
+        deleteWarning: 'This will separate the combined areas and cannot be undone.'
       },
       excluded: {
-        title: 'Excluded Regions',
-        tooltip: 'Click to toggle region visibility'
+        title: 'Excluded Areas',
+        tooltip: 'Click to toggle area visibility'
       }
-    },
+    }
   },
   de: {
     dashboard: {
       title: 'Aktivitäts-Dashboard',
       totalTime: 'Gesamtzeit',
       avgActiveDuration: 'Durchschn. aktive Dauer',
-      totalEmployees: 'Gesamtanzahl Mitarbeiter', 
-      busiestRegion: 'Aktivste Region',
+      totalEmployees: 'Gesamtanzahl Benutzer',
+      busiestRegion: 'Aktivster Bereich',
       activityDistribution: 'Aktivitätsverteilung',
-      employeeActivity: 'Mitarbeiteraktivität',
+      employeeActivity: 'Benutzeraktivität',
       peakActivityTimes: 'Hauptaktivitätszeiten',
-      regionHeatmap: 'Regionale Heatmap',
+      regionHeatmap: 'Bereichs-Heatmap',
       activityTimeline: 'Aktivitätszeitstrahl',
       compare: 'Vergleichen',
       selectDates: 'Daten auswählen',
-      selectEmployee: 'Mitarbeiter auswählen',
-      allEmployees: 'Alle Mitarbeiter',
+      selectEmployee: 'Benutzer auswählen',
+      allEmployees: 'Alle Benutzer',
       loadingDashboard: 'Dashboard wird geladen...',
       preparingAnalytics: 'Analysen werden vorbereitet...',
       hoursAbbreviation: 'Std',
       vsText: 'vs',
       tooltips: {
-        totalTime: 'Gesamtstunden über alle Aktivitäten und Mitarbeiter',
-        avgDuration: 'Durchschnittliche Dauer der Aktivität pro Mitarbeiterschicht',
-        totalEmployees: 'Gesamtanzahl der einzelnen Mitarbeiter',
-        busiestRegion: 'Region mit den meisten Aktivitätsstunden'
+        totalTime: 'Gesamtstunden über alle Aktivitäten und Benutzer',
+        avgDuration: 'Durchschnittliche Dauer der Aktivität pro Benutzersitzung',
+        totalEmployees: 'Gesamtanzahl der einzelnen Benutzer',
+        busiestRegion: 'Bereich mit den meisten Aktivitätsstunden'
       }
     },
     settings: {
@@ -243,15 +243,15 @@ export const translations = {
         activities: 'Aktivitäten',
         dates: 'Daten',
         charts: 'Diagramme',
-        colors: 'Farben',
+        colors: 'Farben'
       },
       activities: {
-        visibleActivities: 'Sichtbare Aktivitäten',
+        visibleActivities: 'Sichtbare Aktivitäten'
       },
       dates: {
         dateSelection: 'Datumsauswahl',
         compareMode: 'Vergleichmodus',
-        compareModeHelp: 'Wählen Sie Daten zum Vergleichen mit dem zweiten Schalter für jedes Datum. Diagramme zeigen Daten von beiden ausgewählten und Vergleichsdaten an.',
+        compareModeHelp: 'Wählen Sie Daten zum Vergleichen mit dem zweiten Schalter für jedes Datum. Diagramme zeigen Daten von beiden ausgewählten und Vergleichsdaten an.'
       },
       charts: {
         visibleCharts: 'Sichtbare Diagramme',
@@ -263,7 +263,7 @@ export const translations = {
         createNew: 'Neu erstellen',
         errors: {
           presetNameModified: 'Bitte geben Sie einen neuen Namen an, wenn Sie ein voreingestelltes Thema ändern',
-          nameConflict: 'Der Name eines voreingestellten Themas kann nicht verwendet werden. Bitte wählen Sie einen anderen Namen.',
+          nameConflict: 'Der Name eines voreingestellten Themas kann nicht verwendet werden. Bitte wählen Sie einen anderen Namen.'
         },
         buttons: {
           editTheme: 'Theme bearbeiten',
@@ -282,32 +282,31 @@ export const translations = {
         actions: {
           save: 'Speichern',
           update: 'Aktualisieren',
-          cancel: 'Abbrechen',
+          cancel: 'Abbrechen'
         },
         colorLabels: {
           primary: 'Primärfarbe {{number}}',
-          comparison: 'Vergleichsfarbe {{number}}',
+          comparison: 'Vergleichsfarbe {{number}}'
         }
       },
       dateSelection: {
         title: 'Datumsauswahl',
         missingEmployees: 'Fehlende Daten von: {{employees}}',
-        missingCount: '{{count}} Mitarbeiter fehlen',
+        missingCount: '{{count}} Benutzer fehlen',
         expected: 'Erwartet: {{count}}',
         present: 'Anwesend: {{count}}',
         weekLabel: 'Woche vom {{date}}',
         tooltip: {
-          employees: 'Mitarbeiter: {{current}}/{{expected}}',
+          employees: 'Benutzer: {{current}}/{{expected}}',
           totalHours: 'Gesamtstunden: {{hours}}h',
-          missingData: 'Fehlende Daten für {{count}} Mitarbeiter'
+          missingData: 'Fehlende Daten für {{count}} Benutzer'
         },
         select: {
           placeholder: 'Daten auswählen...',
           selected: 'Ausgewählt'
         },
-        compareHint: 'Wählen Sie zwei Daten aus, um ihre Aktivitäten zu vergleichen',
+        compareHint: 'Wählen Sie zwei Daten aus, um ihre Aktivitäten zu vergleichen'
       }
-
     },
     common: {
       settings: 'Einstellungen',
@@ -320,20 +319,20 @@ export const translations = {
       error: 'Fehler',
       success: 'Erfolg',
       comparison: {
-        vs: 'vs',
+        vs: 'vs'
       },
       chart: {
-        noLabel: 'Kein Label',
-      },
+        noLabel: 'Kein Label'
+      }
     },
     fileUploader: {
-      title: 'Lageraktivitätsdaten hochladen',
+      title: 'Aktivitätsdaten hochladen',
       clearFiles: 'Dateien löschen',
       dropHere: 'Dateien hier ablegen...',
       dragAndDrop: 'Dateien hier ablegen oder klicken zum Auswählen',
       layoutImage: 'Layout-Bild (PNG)',
       processMetadata: 'Prozess-Metadaten (JSON)',
-      warehouseActivity: 'Lageraktivität (JSON)',
+      warehouseActivity: 'Aktivitätsdaten (JSON)',
       processing: 'Dateien werden verarbeitet...',
       selectFiles: 'Dateien auswählen',
       uploadAllFiles: 'Bitte laden Sie alle erforderlichen Dateien hoch, bevor Sie fortfahren',
@@ -349,24 +348,24 @@ export const translations = {
       timelineSlider: 'Zeitachsen-Positionsregler',
       noDataAvailable: 'Keine Daten für die Zeitachsenvisualisierung verfügbar',
       selectDate: 'Datum auswählen',
-      employee: 'Mitarbeiter {{id}}',
-      noActivities: 'Keine Aktivitäten zu diesem Zeitpunkt',
+      employee: 'Benutzer {{id}}',
+      noActivities: 'Keine Aktivitäten zu diesem Zeitpunkt'
     },
     regionManagement: {
-      title: 'Regionsverwaltung',
+      title: 'Bereichsverwaltung',
       tabs: {
-        regions: 'Aktive Regionen',
+        regions: 'Aktive Bereiche',
         combinations: 'Gespeicherte Kombinationen',
-        excluded: 'Ausgeschlossene Regionen'
+        excluded: 'Ausgeschlossene Bereiche'
       },
       combine: {
-        namePlaceholder: 'Name für kombinierte Region',
+        namePlaceholder: 'Name für kombinierten Bereich',
         buttonCombine: 'Kombinieren',
         buttonUpdate: 'Aktualisieren',
         count: '({{count}})'
       },
       regions: {
-        notAvailable: 'Keine Regionen verfügbar',
+        notAvailable: 'Keine Bereiche verfügbar',
         alreadyCombined: 'Bereits Teil einer Kombination'
       },
       combinations: {
