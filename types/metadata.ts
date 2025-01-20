@@ -33,13 +33,3 @@ export interface FileStatus {
   processMetadata: boolean;
   warehouseData: boolean;
 }
-
-export interface FileUploaderProps {
-  onDataLoaded: (data: WarehouseData) => void;
-}
-
-export interface FileStatus {
-  layout: boolean;
-  processMetadata: boolean;
-  warehouseData: boolean;
-}

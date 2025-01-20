@@ -8,6 +8,9 @@ export interface ActivityRecord {
   region: string;
   activity: string;
   duration: number;
+  isPauseData: boolean;
+  whileUsing: string[];
+  isCloseTo: string[];
 }
 
 export type ChartId = 
