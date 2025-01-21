@@ -1,12 +1,12 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ActivityTooltip } from '@/components/common/ActivityTooltip';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { BaseActivityProps } from '@/types/activity';
+import { CardContent } from '../ui/card';
 
 interface ProcessedData {
   activity: string;
@@ -127,18 +127,15 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>{t('charts.activityDistribution.title')}</CardTitle>
-          <div className="text-sm font-normal text-gray-500">
-            <div>{dateDisplay.selected}</div>
-            {isComparisonEnabled && dateDisplay.comparison && (
-              <div>{t('common.comparison.vs')} {dateDisplay.comparison}</div>
-            )}
-          </div>
+    <>
+      <div className="flex justify-between items-center">
+        <div className="text-sm font-normal text-gray-500">
+          <div>{dateDisplay.selected}</div>
+          {isComparisonEnabled && dateDisplay.comparison && (
+            <div>{t('common.comparison.vs')} {dateDisplay.comparison}</div>
+          )}
         </div>
-      </CardHeader>
+      </div>
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -204,6 +201,6 @@ export const ActivityDistribution: React.FC<BaseActivityProps> = ({
           showComparison={isComparisonEnabled}
         />
       </CardContent>
-    </Card>
+    </>
   );
 };

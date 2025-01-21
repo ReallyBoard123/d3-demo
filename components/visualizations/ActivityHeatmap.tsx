@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -416,10 +416,9 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
   const allRegions = processMetadata.layout.regions.map(r => r.name);
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
+    <>
+      
         <div className="flex items-center justify-between">
-          <CardTitle>{t('heatmap.title')}</CardTitle>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm">{t('heatmap.showInstances')}</span>
@@ -453,7 +452,7 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
             </Dialog>
           </div>
         </div>
-      </CardHeader>
+     
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {selectedActivities.map((activity, index) => (
@@ -485,7 +484,7 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
           </p>
         </div>
       </CardContent>
-    </Card>
+    </>
   );
 };
 

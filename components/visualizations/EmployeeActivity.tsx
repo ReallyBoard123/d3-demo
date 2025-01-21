@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { ActivityTooltip } from '@/components/common/ActivityTooltip';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
@@ -136,10 +136,8 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
     })), [activityOrder, colors, inactiveActivities, isComparisonEnabled, translateActivity]);
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <>
         <div className="flex justify-between items-center">
-          <CardTitle>{t('dashboard.employeeActivity')}</CardTitle>
           <div className="text-sm font-normal text-gray-500">
             <div>{dateDisplay.selected}</div>
             {isComparisonEnabled && dateDisplay.comparison && (
@@ -147,7 +145,7 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
             )}
           </div>
         </div>
-      </CardHeader>
+      
       <CardContent>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -195,6 +193,6 @@ export const EmployeeActivity: React.FC<BaseActivityProps> = ({
           showComparison={isComparisonEnabled}
         />
       </CardContent>
-    </Card>
+    </>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
@@ -104,10 +104,9 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <>
+      
         <div className="flex justify-between items-center">
-          <CardTitle>{t('dashboard.regionHeatmap')}</CardTitle>
           <div className="text-sm font-normal text-gray-500">
             <div>{dateDisplay.selected}</div>
             {isComparisonEnabled && dateDisplay.comparison && (
@@ -115,7 +114,7 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
             )}
           </div>
         </div>
-      </CardHeader>
+      
       <CardContent>
         <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-2">
           {regionData.map(({ region, selectedHours, comparisonHours, selectedIntensity }) => (
@@ -166,6 +165,6 @@ export const RegionHeatmap: React.FC<BaseActivityProps> = ({
           showComparison={isComparisonEnabled}
         />
       </CardContent>
-    </Card>
+    </>
   );
 };
