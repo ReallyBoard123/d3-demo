@@ -7,10 +7,23 @@ const nextConfig = {
           // Apply these headers to all routes
           source: '/:path*',
           headers: [
-            // Content Security Policy
+            // Content Security Policy - More secure version
             {
               key: 'Content-Security-Policy',
-              value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*; font-src 'self' data:; frame-ancestors 'none';"
+              value: [
+                "default-src 'self'",
+                // Use nonces instead of unsafe-inline where possible
+                "script-src 'self' 'strict-dynamic' https://cdnjs.cloudflare.com",
+                "style-src 'self' 'unsafe-inline'", // Style inline is often needed
+                "img-src 'self' data: https://*",
+                "font-src 'self' data:",
+                "frame-ancestors 'none'",
+                "connect-src 'self' https://*.vercel.app",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "object-src 'none'",
+                "upgrade-insecure-requests"
+              ].join('; ')
             },
             // Prevent clickjacking
             {
