@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 
 
 import "./globals.css";
-import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import { LanguageSwitcher } from '@/components/shared';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

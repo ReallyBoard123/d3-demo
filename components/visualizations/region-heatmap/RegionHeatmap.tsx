@@ -1,6 +1,6 @@
 import React from 'react';
 import { CardContent } from '@/components/ui/card';
-import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
+import { ChartLegend, type LegendItem } from '../activity-distribution/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
 import { useTranslation } from '@/hooks/useTranslation';

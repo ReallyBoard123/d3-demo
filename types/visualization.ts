@@ -33,34 +33,6 @@ export interface DashboardOverviewProps {
   data: ActivityRecord[];
 }
 
-export interface SettingsSidebarProps {
-  metadata: Metadata & {
-    expectedEmployeeCount: number;
-  };
-  dateMetrics: Record<string, DateMetrics>;
-  filterSettings: FilterSettings;
-  onFilterChange: (newSettings: FilterSettings) => void;
-  availableCharts: readonly ChartConfig[];
-}
-
-export interface DateMetrics {
-  employeeCount: number;
-  totalDuration: number;
-  missingEmployees: string[];
-}
-
-export interface DashboardProps {
-  data: ActivityRecord[];
-}
-
-export interface DashboardOverviewProps {
-  metadata: Metadata;
-  selectedDates: Set<string>;
-  comparisonDates: Set<string>;
-  isComparisonEnabled: boolean;
-  data: ActivityRecord[];
-}
-
 export interface DateMetrics {
   employeeCount: number;
   totalDuration: number;
@@ -73,6 +45,7 @@ export interface SettingsSidebarProps {
   };
   dateMetrics: Record<string, DateMetrics>;
   filterSettings: FilterSettings;
-  onFilterChange: (newSettings: FilterSettings) => void;
+  onFilterChange: (settings: FilterSettings) => void;
   availableCharts: readonly ChartConfig[];
+  onChartSelect: (chartId: ChartId) => void;
 }

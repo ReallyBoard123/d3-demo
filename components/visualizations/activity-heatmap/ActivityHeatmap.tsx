@@ -8,11 +8,11 @@ import { Settings2 } from "lucide-react";
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRegionStore } from '@/stores/useRegionStore';
-import BaseWarehouseCanvas, { calculateRegionDimensions, renderRegionText } from '../BaseWarehouseCanvas';
+import { WarehouseCanvas, calculateRegionDimensions, renderRegionText } from '../warehouse';
+import { HeatmapTooltipOverlay } from './HeatmapTooltip';
+import RegionManagement from './RegionManagement';
 import { formatDuration } from '@/lib/utils';
 import type { ActivityRecord, BaseActivityProps } from '@/types';
-import { HeatmapTooltipOverlay } from '../HeatmapTooltip';
-import RegionManagement from '../RegionManagement';
 import { RegionDimensions, ExtendedProcessMetadata } from '@/lib/RegionCalculations';
 
 const INSTANCE_DURATION_THRESHOLD = 5;
@@ -331,7 +331,7 @@ const SingleHeatmap: React.FC<SingleHeatmapProps> = React.memo(({
 
   return (
     <div className="relative" ref={containerRef}>
-      <BaseWarehouseCanvas
+      <WarehouseCanvas
         layoutImage={layoutImage}
         metadata={metadata}
         onRender={renderHeatmap}
@@ -348,14 +348,14 @@ const SingleHeatmap: React.FC<SingleHeatmapProps> = React.memo(({
           containerRef={containerRef}
           showInstances={showInstances}
         />
-      </BaseWarehouseCanvas>
+      </WarehouseCanvas>
     </div>
   );
 });
 
 SingleHeatmap.displayName = 'SingleHeatmap';
 
-const ActivityHeatmap: React.FC<BaseActivityProps> = ({ 
+export const ActivityHeatmap: React.FC<BaseActivityProps> = ({ 
   data, 
   hiddenActivities, 
   selectedDates 
@@ -487,5 +487,3 @@ const ActivityHeatmap: React.FC<BaseActivityProps> = ({
     </>
   );
 };
-
-export default ActivityHeatmap;

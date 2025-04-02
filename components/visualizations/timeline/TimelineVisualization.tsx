@@ -8,8 +8,8 @@ import { TIMELINE_CONSTANTS } from '@/types/timeline';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import TimelineControls from '../timeline/TimelineControls';
-import WarehouseCanvas from '../timeline/WarehouseCanvas';
-import { ActivityList } from './ActivityTimeline';
+import { WarehouseCanvas } from '@/components/visualizations/warehouse/WarehouseCanvas';
+import { ActivityList } from './ActivityList';
 import { useProcessMetadata } from '@/hooks/useProcessMetadata';
 import { useTranslation } from '@/hooks/useTranslation';
 

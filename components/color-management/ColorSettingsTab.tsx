@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ColorPaletteGenerator } from '../ColorPalleteGenerator';
+import { ColorPaletteGenerator } from './ColorPaletteGenerator';
 import { ColorSchemeOption } from './ColorSchemeOption';
 import { COLOR_SCHEMES, type ColorPalette } from '@/config/color';
 import { useTranslation } from '@/hooks/useTranslation';

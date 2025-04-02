@@ -5,8 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DateSelection } from '@/components/DateSelection';
-import ColorSettingsTab from './common/ColorSettingsTab';
+import { DateSelection } from '@/components/filters';
+import { ColorSettingsTab } from '@/components/color-management';
 import { ChartId, SettingsSidebarProps } from '@/types';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -16,6 +16,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   filterSettings,
   onFilterChange,
   availableCharts,
+  onChartSelect,
 }) => {
   const { t } = useTranslation();
 
@@ -43,6 +44,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       ...filterSettings,
       visibleCharts: newVisibleCharts,
     });
+    onChartSelect(chartId);
   };
 
   const availableDates = React.useMemo(() => {

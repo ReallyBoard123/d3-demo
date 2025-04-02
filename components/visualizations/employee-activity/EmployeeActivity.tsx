@@ -1,8 +1,8 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CardContent } from '@/components/ui/card';
-import { ActivityTooltip } from '@/components/common/ActivityTooltip';
-import { ChartLegend, type LegendItem } from '@/components/common/ChartLegend';
+import { ActivityTooltip } from '@/components/shared';
+import { ChartLegend, type LegendItem } from '../activity-distribution/ChartLegend';
 import { formatDateRange } from '@/lib/utils';
 import { useColorStore } from '@/stores/useColorStore';
 import { useTranslation } from '@/hooks/useTranslation';

@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Dashboard from '@/components/Dashboard';
-import FileUploader from '@/components/FileUploader';
+import { Dashboard } from '@/components/dashboard';
+import { FileUploader } from '@/components/shared';
 import { WarehouseData } from '@/types';
 
 
